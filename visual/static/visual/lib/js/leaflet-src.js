@@ -7168,9 +7168,9 @@ function icon(options) {
 var IconDefault = Icon.extend({
 
 	options: {
-		iconUrl:       '/static/DjangoDashTest/images/marker-icon.png',
-		iconRetinaUrl: '/static/DjangoDashTest/images/marker-icon-2x.png',
-		shadowUrl:     '/static/DjangoDashTest/images/marker-shadow.png',
+		iconUrl:       '/static/visual/images/marker-icon.png',
+		iconRetinaUrl: '/static/visual/images/marker-icon-2x.png',
+		shadowUrl:     '/static/visual/images/marker-shadow.png',
 		iconSize:    [25, 41],
 		iconAnchor:  [12, 41],
 		popupAnchor: [1, -34],
