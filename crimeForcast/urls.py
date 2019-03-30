@@ -21,10 +21,11 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('vis/', include('visual.urls'))
+    path('vis/', include('visual.urls')),
+    path('predict/', include('predict.urls'))
 ]
 
 
-##added to serve static files
+# added to serve static files
 if settings.DEBUG == True:
     urlpatterns += staticfiles_urlpatterns()
