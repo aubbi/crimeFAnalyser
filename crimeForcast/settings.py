@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'visual.apps.VisualConfig',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -127,3 +128,9 @@ STATIC_URL = '/static/'
 
 ##added to serve static files
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+
+#redirect user after login
+LOGIN_REDIRECT_URL = '/vis/home/'
+
+#redirect user after logout
+LOGOUT_REDIRECT_URL = '/accounts/login/'

@@ -328,9 +328,9 @@ function makeMap(records, id){
 
 };
 
-/*
+
 //this make a map with a different markers for each type of crime
-function makeMap(records, id){
+/*function makeMap(records, id){
     var crimeMap = dc.leafletCustomChart("#"+id);
         var ndx = crossfilter(records);
 

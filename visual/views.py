@@ -9,8 +9,9 @@ import numpy as np
 from visual.models import Crime
 from django.db.models import Count
 #from statsmodels.tsa.seasonal import seasonal_decompose
+from django.contrib.auth.decorators import login_required
 
-
+@login_required
 def index(request):
     template = loader.get_template('visual/starter.html')
     context ={
@@ -18,6 +19,7 @@ def index(request):
     }
     return HttpResponse(template.render(context,request))
 
+@login_required
 def showMap(request):
     listOfCrimes = ['THEFT','BATTERY','CRIMINAL DAMAGE','ASSAULT','OTHER OFFENSE','NARCOTICS','DECEPTIVE PRACTICE',
                     'MOTOR VEHICLE THEFT','ROBBERY','BURGLARY','CRIMINAL TRESPASS','WEAPONS VIOLATION',
@@ -29,6 +31,8 @@ def showMap(request):
     }
     return render(request, 'visual/mapNormal.html', context)
 
+
+@login_required
 def showHeatMap(request):
     listOfCrimes = ['THEFT','BATTERY','CRIMINAL DAMAGE','ASSAULT','OTHER OFFENSE','NARCOTICS','DECEPTIVE PRACTICE',
                     'MOTOR VEHICLE THEFT','ROBBERY','BURGLARY','CRIMINAL TRESPASS','WEAPONS VIOLATION',
@@ -40,6 +44,8 @@ def showHeatMap(request):
     }
     return render(request, 'visual/heatMap.html', context)
 
+
+@login_required
 def compareCrimes(request):
     listOfCrimes = ['THEFT','BATTERY','CRIMINAL DAMAGE','ASSAULT','OTHER OFFENSE','NARCOTICS','DECEPTIVE PRACTICE',
                     'MOTOR VEHICLE THEFT','ROBBERY','BURGLARY','CRIMINAL TRESPASS','WEAPONS VIOLATION',
@@ -153,7 +159,6 @@ def customFilter(request):
         #resultTrend = seasonal_decompose(serie, model='additive')
         #print(resultTrend.trend)
 
-
     return HttpResponse(json.dumps({'result':result, 'corr':resultCorr}))
 
 #get insights from timeseries data
@@ -181,7 +186,7 @@ def default(request):
 
 def defaultHome(request):
 
-    rawData = Crime.objects.filter(Date__range=['2016-01-01', '2016-12-31']).order_by('Date')[:20000]
+    rawData = Crime.objects.filter(Date__range=['2016-01-01', '2016-12-31']).order_by('Date')[:1000]
     result = []
     for i in rawData.values():
         i['Date'] = i['Date'].strftime('%m/%d/%Y')
