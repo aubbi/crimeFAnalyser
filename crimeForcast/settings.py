@@ -25,12 +25,14 @@ SECRET_KEY = 'f+*#l+(!j_@2qw-1f-4ax3&odn8k-n9m#u^nhlan46st6$bpn)'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
 INSTALLED_APPS = [
+    # 'suit',
+    # 'django.contrib.admin',
+    # 'crimeForcast.apps.SuitConfig'
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'visual.apps.VisualConfig',
     'predict.apps.PredictConfig',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -127,3 +130,9 @@ STATIC_URL = '/static/'
 
 # added to serve static files
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+
+# redirect user after login
+LOGIN_REDIRECT_URL = '/vis/home/'
+
+# redirect user after logout
+LOGOUT_REDIRECT_URL = '/accounts/login/'

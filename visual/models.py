@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Crime(models.Model):
 
     #Case_Number = models.TextField(max_length=1000)
@@ -22,7 +23,11 @@ class Crime(models.Model):
     #Updated_on = models.DateTimeField()
     Latitude = models.FloatField()
     Longitude = models.FloatField()
+
     class Meta:
         managed = True
         db_table = 'crimes_table'
 
+# we should add this method to display database for the admin: ID missing, ...
+    def __str__(self):
+        return 'Crime: ' + self.Primary_Type
