@@ -82,6 +82,7 @@ function forecastTrend(records) {
 
   var chart = AmCharts.makeChart("chartdiv", {
     type: "serial",
+    language: "fr",
     theme: "dark",
     legend: {
       useGraphSettings: true
