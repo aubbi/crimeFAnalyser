@@ -33,9 +33,11 @@ function forecastAll(records) {
 
   for (i = 0; i < Object.size(records.crimes); i++) {
     price = records.crimes[i].y;
-    x1.push({ date: new Date(records.crimes[i].ds) });
-    y1.push({ price });
+    x1.push(new Date(records.crimes[i].ds));
+    x1.push(i);
+    y1.push(price);
   }
+
   console.log(x1);
   var trace1 = {
     x: x1,
