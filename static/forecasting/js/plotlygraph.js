@@ -41,21 +41,31 @@ function forecastAll(records) {
     x: x1,
     y: y1,
     mode: "lines",
-    type: "scatter"
+    type: "scatter",
+    name: "taux réel"
   };
 
   for (i = 0; i < Object.size(records.forecast); i++) {
     number2 = records.forecast[i].yhat;
     date2 = records.forecast[i].ds;
-    x1.push(date2);
-    y1.push(number2);
+    x2.push(date2);
+    y2.push(number2);
   }
 
   var trace2 = {
     x: x2,
     y: y2,
     mode: "lines+markers",
-    type: "scatter"
+    type: "scatter",
+    name: "taux prédit",
+    marker: {
+      color: "rgb(17, 157, 255)",
+      size: 20,
+      line: {
+        color: "red",
+        width: 2
+      }
+    }
   };
 
   var data = [trace1, trace2];
@@ -63,12 +73,9 @@ function forecastAll(records) {
   var layout = {
     xaxis: {
       type: "date",
-      title: "January Weather"
+      title: "Les jours"
     },
-    yaxis: {
-      title: "Daily Mean Temperature"
-    },
-    title: "2000 Toronto January Weather"
+    title: "Le nombre de crimes par jour"
   };
 
   Plotly.newPlot("myDiv", data, layout, { showSendToCloud: true });
