@@ -14,45 +14,44 @@
                                         <div id="accordion51" class="collapse" data-parent="#accordion5" style="">
                                             <div class="card-body">
                                                 <form action="{% url 'customFilter'  %}" method="post" id="filter_form">
-                                        {% csrf_token %}
-                                            <b class="text-muted mb-3 mt-4 d-block">Types of crimes</b>
-                                            {% for crime in crimes  %}
-                                                <div class="custom-control custom-checkbox custom-control-inline">
-                                                <input type="checkbox" class="custom-control-input crimeBox" id="{{ crime }}" name="types[]" value="{{ crime }}">
-                                                <label class="custom-control-label" for="{{ crime }}">{{ crime }}</label>
-                                            </div>
-                                            {% endfor %}
-                                            <div class="form-row">
-                                                <div class="col-md-4 mb-3">
-                                                    <div class="form-group">
-                                                        <label for="start_date" class="col-form-label">Start date</label>
-                                                        <input class="form-control" name="startDate" type="date" value="2016-01-05" id="start_date">
-                                                     </div>
-                                                </div>
-                                                <div class="col-md-4 mb-3">
-                                                    <div class="form-group">
-                                                        <label for="end_date" class="col-form-label">End date</label>
-                                                        <input class="form-control" name="endDate" type="date" value="2016-03-05" id="end_date">
-                                                     </div>
-                                                </div>
-                                                <div class="col-md-4 mb-3">
-                                                    <label for="end_date" class="col-form-label">Arrested</label>
-                                                    <div class="form-group">
+                                                {% csrf_token %}
+                                                    <b class="text-muted mb-3 mt-4 d-block">Types of crimes</b>
+                                                    {% for crime in crimes  %}
                                                         <div class="custom-control custom-checkbox custom-control-inline">
-                                                            <input type="checkbox" class="custom-control-input arrest" id="true" name="arrest[]" value="1">
-                                                            <label class="custom-control-label" for="true">True</label>
+                                                        <input type="checkbox" class="custom-control-input crimeBox" id="{{ crime }}" name="types[]" value="{{ crime }}">
+                                                        <label class="custom-control-label" for="{{ crime }}">{{ crime }}</label>
+                                                    </div>
+                                                    {% endfor %}
+                                                    <div class="form-row">
+                                                        <div class="col-md-4 mb-3">
+                                                            <div class="form-group">
+                                                                <label for="start_date" class="col-form-label">Start date</label>
+                                                                <input class="form-control" name="startDate" type="date" value="2016-01-05" id="start_date">
+                                                            </div>
                                                         </div>
-                                                        <div class="custom-control custom-checkbox custom-control-inline">
-                                                            <input type="checkbox" class="custom-control-input arrest" id="false" name="arrest[]" value="0">
-                                                            <label class="custom-control-label" for="false">False</label>
+                                                        <div class="col-md-4 mb-3">
+                                                            <div class="form-group">
+                                                                <label for="end_date" class="col-form-label">End date</label>
+                                                                <input class="form-control" name="endDate" type="date" value="2016-03-05" id="end_date">
+                                                            </div>
                                                         </div>
-                                                     </div>
-                                                </div>
-                                            </div>
-                                            <button type="submit" class="btn btn-primary mt-4 pr-4 pl-4" >Submit</button>
+                                                        <div class="col-md-4 mb-3">
+                                                            <label for="end_date" class="col-form-label">Arrested</label>
+                                                            <div class="form-group">
+                                                                <div class="custom-control custom-checkbox custom-control-inline">
+                                                                    <input type="checkbox" class="custom-control-input arrest" id="true" name="arrest[]" value="1">
+                                                                    <label class="custom-control-label" for="true">True</label>
+                                                                </div>
+                                                                <div class="custom-control custom-checkbox custom-control-inline">
+                                                                    <input type="checkbox" class="custom-control-input arrest" id="false" name="arrest[]" value="0">
+                                                                    <label class="custom-control-label" for="false">False</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary mt-4 pr-4 pl-4" >Submit</button>
 
-                                        </form>
-
+                                                 </form>
                                             </div>
                                         </div>
                                     </div>
@@ -126,7 +125,7 @@
                     </div>
                 </div>
 
-    {% endblock %}
+{% endblock %}
 {% block scripts %}
     <script type="text/javascript">
         // this function will generate a png file of the element provided by ID
@@ -180,18 +179,7 @@
                     alert('no response');
                 }
             });
-        });
-        /*function getFiltereData(){
-            $.ajax({
-                type: 'GET',
-                url: '../filterdata',
-                dataType: 'json',
-                success: function (data) {
-                    console.log(data); // do anything you want with your parsed data
-                }
-            });
-        };*/
-
+        }); 
     </script>
 {% endblock %}
 </body>
