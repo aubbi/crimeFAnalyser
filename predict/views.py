@@ -58,7 +58,7 @@ def makeForecast(request):
     # # fit the dataframe to the Prophet model
     m.fit(crimes)
     # create a new period to forecast
-    future = m.make_future_dataframe(periods=50)
+    future = m.make_future_dataframe(periods=10)
     # making the forecast
     forecast = m.predict(future)
     forecast['ds'] = forecast.ds.astype(str)
@@ -68,5 +68,6 @@ def makeForecast(request):
     # result = json.dumps(result)
     crimes = crimes.to_dict(orient='records')
     forecast = forecast.to_dict(orient='records')
+
     # result = crimes.to_json(orient='records')
     return JsonResponse({'crimes': crimes, 'forecast': forecast})

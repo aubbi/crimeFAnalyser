@@ -3,6 +3,45 @@
 {% block content %}
 <body class="keen-dashboard">
   <br><br>
+  <div class="row">
+  <div class="col-lg-4">
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <label class="input-group-text success" for="inputGroupSelect01">Temperature</label>
+      </div>
+      <select class="custom-select" id="inputGroupSelect01">
+        {% for crime in crimes  %}
+        <option value="{{ crime }}">{{ crime }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <label class="input-group-text success" for="inputGroupSelect01">Coefficient de Fourier - Semaine</label>
+      </div>
+      <select class="custom-select" id="inputGroupSelect01">
+        {% for crime in crimes  %}
+        <option value="{{ crime }}">{{ crime }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <label class="input-group-text success" for="inputGroupSelect01">Seasonalité hebdomadaire</label>
+      </div>
+      <select class="custom-select" id="inputGroupSelect01">
+        {% for crime in crimes  %}
+        <option value="{{ crime }}">{{ crime }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  </div>
+
   <div class="input-group mb-3">
     <div class="input-group-prepend">
       <label class="input-group-text success" for="inputGroupSelect01">Temperature</label>
@@ -57,7 +96,7 @@
       <button type="submit" class="btn btn-primary mt-4 pr-4 pl-4">Submit</button>
 
       <!-- Plotly.js -->
-    <div id="myDiv"></div>
+    <div id="myDiv" style="height: 600px; width: 100%"></div>
     </form>
     <div class="row" >
       <div style="height: 600px; width: 100%" id="firstForecast"></div>

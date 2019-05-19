@@ -60,7 +60,7 @@ function forecastAll(records) {
     name: "taux prédit",
     marker: {
       color: "rgb(17, 157, 255)",
-      size: 20,
+      size: 5,
       line: {
         color: "red",
         width: 2
