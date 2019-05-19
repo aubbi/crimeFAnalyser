@@ -1,5 +1,13 @@
 from django.db import models
 
+class Stats(models.Model):
+    Date = models.DateField()
+    Type = models.TextField(max_length=300)
+    Count = models.IntegerField()
+    class Meta:
+        managed = True
+        db_table = 'stats_table'
+
 class Crime(models.Model):
 
     #Case_Number = models.TextField(max_length=1000)

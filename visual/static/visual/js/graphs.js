@@ -474,7 +474,7 @@ function groupArrayAdd(keyfn) {
 
 function makeComparaison(records) {
 
-    var chart = dc.seriesChart("#test");
+    var chart = dc.seriesChart("#compareChart");
 
     var ndx = crossfilter(records.result);
     var crimeDim = ndx.dimension(function (d) {

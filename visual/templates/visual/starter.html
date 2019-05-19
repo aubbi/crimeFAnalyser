@@ -119,6 +119,7 @@
 
         },*/
         success : function (response) {
+            console.log(JSON.parse(response));
             makeGraphs(JSON.parse(response));
             //$('#image-loading').hide();
 
