@@ -49,6 +49,7 @@ function forecastAll(records) {
     number2 = records.forecast[i].yhat;
     date2 = records.forecast[i].ds;
     x2.push(date2);
+    console.log(x2);
     y2.push(number2);
   }
 
