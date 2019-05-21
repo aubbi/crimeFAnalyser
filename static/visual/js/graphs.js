@@ -411,6 +411,16 @@ function makeHeatMap(records, rendered) {
     };
     heatMap = L.map('map');
     //if(heatMap != undefined || heatMap != null)
+    //adding print map fonctionality
+    var printer = L.easyPrint({
+      		tileLayer: 'something',
+      		sizeModes: ['Actuel', 'A4Landscape', 'A4Portrait'],
+      		filename: 'heatMap',
+      		exportOnly: true,
+		}).addTo(heatMap);
+
+
+
     var ndx = crossfilter(records);
     var total = ndx.groupAll();
     var allDim = ndx.dimension(function (d) {return d;});
@@ -547,8 +557,35 @@ function makeTableCorr(objects) {
     return html;
 }
 
+function makeClusteringResultsTable(records){
+
+    //var html = "<tr class="text-white"><th scope="col">"+title+"</th></tr>"
+    var html = '';
+    var k = 1;
+    for (var key in records){
+        html +="<tr><th>"+ k +"</th><th>";
+        x = records[key]
+        for (i=0; i<x.length; i++){
+            html+= x[i]+"; ";
+        }
+        html+= "</th>";
+        k++;
+    }
+
+    return html;
+
+}
 
 
+      // this function will generate a png file of the element provided by ID and save it as as output_name.png
+        function toPNG(id,output_name ) {
+            var options = {};
+            options.backgroundColor = '#ffffff';
+            options.selectorRemap = function(s) { return s.replace(/\.dc-chart/g, ''); };
+            var chart = document.getElementById(id).getElementsByTagName('svg')[0];
+            saveSvgAsPng(chart, output_name+'.png', options)
+
+        }
 
 
 

@@ -7,7 +7,10 @@ from django.template import loader
 import pandas as pd
 import numpy as np
 from visual.models import Crime
-from django.db.models import Count
+from django.db.models import Count, Sum, IntegerField
+from django.db.models.functions import Cast
+
+from sklearn.cluster import KMeans, AgglomerativeClustering
 #from statsmodels.tsa.seasonal import seasonal_decompose
 from django.contrib.auth.decorators import login_required
 
@@ -31,6 +34,10 @@ def showMap(request):
     }
     return render(request, 'visual/mapNormal.html', context)
 
+@login_required
+def cluster(request):
+
+    return render(request,'visual/clustering.html')
 
 @login_required
 def showHeatMap(request):
@@ -192,3 +199,72 @@ def defaultHome(request):
         i['Date'] = i['Date'].strftime('%m/%d/%Y')
         result.append(i)
     return HttpResponse(json.dumps(result))
+
+
+def makeKmeans(request):
+
+    numberCluster = request.POST['numberClusters']
+    numberTests = request.POST['numberEssais']
+    numberIterations = request.POST['numberIterations']
+    numberClustersHi = request.POST['numberClustersHi']
+
+    df1 = pd.DataFrame(list(Crime.objects.all().values('Primary_Type')
+                            .annotate(count=Count('id'))))
+
+    allTypes = df1['Primary_Type'].unique()
+    #df1['arrested'] = 0
+    #df1['not_arrested'] = 0
+
+    for index,row in df1.iterrows():
+        f = Crime.objects.filter(Primary_Type=row['Primary_Type'], Arrest=True).count()
+        ff = (f/row['count'])
+        df1.at[index, 'arrested'] = ff
+        df1.at[index, 'not_arrested'] = 1- ff
+
+    to_analyze  = df1[['count','arrested','not_arrested']]
+    clusters_kmeans = KMeans(n_clusters=int(numberCluster), n_init=int(numberTests), max_iter=int(numberIterations))
+    clusters_kmeans.fit(to_analyze)
+    clusters_kmeans.cluster_centers_
+    result_kmeans = clusters_kmeans.labels_
+    to_return_Kmeans = {}
+    for i in range(0,int(numberCluster)):
+        to_return_Kmeans[i] = []
+
+    for i, item in enumerate(result_kmeans):
+        to_return_Kmeans[item].append(allTypes[i])
+
+    print(to_return_Kmeans)
+
+
+    # clustering hiearchique
+    if numberClustersHi:
+        clusters_hiearchique = AgglomerativeClustering(int(numberClustersHi)).fit(to_analyze)
+    else:
+        clusters_hiearchique = AgglomerativeClustering().fit(to_analyze)
+
+    result_hiearchique = clusters_hiearchique.labels_
+
+    to_return_Hi = {}
+    for i in range(0, len(np.unique(result_hiearchique))):
+        to_return_Hi[i] = []
+
+    for i, item in enumerate(result_hiearchique):
+        to_return_Hi[item].append(allTypes[i])
+
+    print(to_return_Hi)
+
+
+    return HttpResponse(json.dumps({'hi':to_return_Hi,'kmeans':to_return_Kmeans}))
+
+def getCount(df, type, date):
+    x = pd.DataFrame(list(df[(df['Primary_Type'] ==type) & (df['Date']==date)].values))
+    if x.empty:
+        return 0
+    else:
+        return float(x[2].values)
+
+
+
+
+
+

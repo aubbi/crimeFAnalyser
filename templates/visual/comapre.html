@@ -9,13 +9,13 @@
                                 <div id="accordion5" class="according accordion-s2 gradiant-bg">
                                     <div class="card">
                                         <div class="card-header">
-                                            <a class="card-link" data-toggle="collapse" href="#accordion51" aria-expanded="true">Filter data</a>
+                                            <a class="card-link" data-toggle="collapse" href="#accordion51" aria-expanded="true">Filtrage des données</a>
                                         </div>
                                         <div id="accordion51" class="collapse" data-parent="#accordion5" style="">
                                             <div class="card-body">
                                                 <form action="{% url 'customFilter'  %}" method="post" id="filter_form">
                                                 {% csrf_token %}
-                                                    <b class="text-muted mb-3 mt-4 d-block">Types of crimes</b>
+                                                    <b class="text-muted mb-3 mt-4 d-block">Types de crimes</b>
                                                     {% for crime in crimes  %}
                                                         <div class="custom-control custom-checkbox custom-control-inline">
                                                         <input type="checkbox" class="custom-control-input crimeBox" id="{{ crime }}" name="types[]" value="{{ crime }}">
@@ -25,18 +25,18 @@
                                                     <div class="form-row">
                                                         <div class="col-md-4 mb-3">
                                                             <div class="form-group">
-                                                                <label for="start_date" class="col-form-label">Start date</label>
+                                                                <label for="start_date" class="col-form-label">Date début</label>
                                                                 <input class="form-control" name="startDate" type="date" value="2016-01-05" id="start_date">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4 mb-3">
                                                             <div class="form-group">
-                                                                <label for="end_date" class="col-form-label">End date</label>
+                                                                <label for="end_date" class="col-form-label">Date fin</label>
                                                                 <input class="form-control" name="endDate" type="date" value="2016-03-05" id="end_date">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4 mb-3">
-                                                            <label for="end_date" class="col-form-label">Arrested</label>
+                                                            <label for="end_date" class="col-form-label">Arrestation</label>
                                                             <div class="form-group">
                                                                 <div class="custom-control custom-checkbox custom-control-inline">
                                                                     <input type="checkbox" class="custom-control-input arrest" id="true" name="arrest[]" value="1">
@@ -49,7 +49,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <button type="submit" class="btn btn-primary mt-4 pr-4 pl-4" >Submit</button>
+                                                    <button type="submit" class="btn btn-primary btn-lg btn-block" >Calculer</button>
 
                                                  </form>
                                             </div>
@@ -60,12 +60,18 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row" id="graph" style="visibility: hidden">
                          <div class="col-xl-12 mt-2">
                             <div class="card">
                                 <div class="card-body" id="mapParent">
-                                    <h4 class="header-title">Crimes | date range: <span id="date-range"></span></h4>
-                                    <button onclick="toPNG()" >print</button>
+                                    <div class="row">
+                                        <div class="col-sm-8">
+                                            <h4 class="header-title">Type de crimes | intervalle: <span id="date-range"></span></h4>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button class="pull-right btn btn-rounded btn-primary mb-3"  onclick="toPNG('compareChart', 'comparaison')" >Sauvegarder</button>
+                                        </div>
+                                    </div>
                                     <div id="compareChart" style="width: 100%; height: 500px"></div>
                                 </div>
                             </div>
@@ -84,9 +90,9 @@
                                                     <th scope="col">Type</th>
                                                     <th scope="col">Max</th>
                                                     <th scope="col">Min</th>
-                                                    <th scope="col">Median</th>
+                                                    <th scope="col">Mediane</th>
                                                     <th scope="col">Total</th>
-                                                    <th scope="col">Average</th>
+                                                    <th scope="col">Moyenne</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="table-body">
@@ -109,8 +115,8 @@
                                         <table class="table text-center">
                                             <thead class="text-uppercase bg-primary">
                                                 <tr class="text-white">
-                                                    <th scope="col">Crimes</th>
-                                                    <th scope="col">correlation</th>
+                                                    <th scope="col">Type de crime</th>
+                                                    <th scope="col">Correlation</th>
 
                                                 </tr>
                                             </thead>
@@ -128,15 +134,6 @@
 {% endblock %}
 {% block scripts %}
     <script type="text/javascript">
-        // this function will generate a png file of the element provided by ID
-        function toPNG() {
-            var options = {};
-            options.backgroundColor = '#ffffff';
-            options.selectorRemap = function(s) { return s.replace(/\.dc-chart/g, ''); };
-            var chart = document.getElementById('compareChart').getElementsByTagName('svg')[0];
-            saveSvgAsPng(chart, 'chart.png', options)
-
-        }
 
         var token = '{{csrf_token}}';
         $(document).on('submit', '#filter_form', function(e){
@@ -161,7 +158,10 @@
                     arrest: arrest,
                 },
                 success : function (response) {
-                    console.log(JSON.parse(response));
+                    var element = document.getElementById('graph');
+                    if(element.style.visibility =='hidden'){
+                        element.style.visibility = 'visible';
+                    };
                     var element = document.getElementById('table-all');
                     if(element.style.visibility =='hidden'){
                         element.style.visibility = 'visible';

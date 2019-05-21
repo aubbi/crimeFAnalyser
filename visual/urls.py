@@ -10,7 +10,9 @@ urlpatterns = [
     path('map/', views.showMap),
     path('heat-map/', views.showHeatMap),
     path('compare/', views.compareCrimes),
+    path('cluster/', views.cluster),
     url(r'^filterdata', views.filterData, name="filterData"),
     url(r'^customFilter', views.customFilter, name="customFilter"),
     url(r'^getInsights', views.findInsightsTS, name="findInsightsTS"),
+    url(r'^makeKmeans', views.makeKmeans, name="kmeans"),
 ]
