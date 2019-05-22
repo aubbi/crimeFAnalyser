@@ -3,44 +3,156 @@
 {% block content %}
 <body class="keen-dashboard">
   <br><br>
-  <div class="row">
-  <div class="col-lg-4">
-    <div class="input-group mb-3">
-      <div class="input-group-prepend">
-        <label class="input-group-text success" for="inputGroupSelect01">Temperature</label>
-      </div>
-      <select class="custom-select" id="inputGroupSelect01">
+
+ 
+  <div class="row"> 
+    <h4>Prévision de la criminalité</h4>
+    
+    <p>Pour une utilisation efficace de la fonctionnalité de prédiction, veuillez suivre les étapes suivantes:
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">1. filtrer selon ce que vous voulez vos prédictions (Historique/Période/Type d'infraction/Type de lieu/Lieu)</li>
+      <li class="list-group-item">2. Choisissez la méthode de prévision que vous voulez</li>
+      <li class="list-group-item">3. Paramétrez le modèle selon le données (Lire la partie: Instruction pour plus de détails)</li>
+      <li class="list-group-item">4. Cliquez sur: Prévoir la criminalité</li>
+      <li class="list-group-item">5. Analyser et sauvegarder les résultats</li>
+    </ul>
+  </div>
+<br><br>
+<div class="row"><h2>1. Filtrage de données</h2></div>
+<br><br>
+<div class="row">
+  <div class="col-md-12">
+    <form action="{% url 'makeForecast'  %}" method="post" id="forecast_form">
+      {% csrf_token %}
+      <div class="col-md-4">
+        <b class="text-muted mb-3 mt-4 d-block">Types des infractions</b>
         {% for crime in crimes  %}
-        <option value="{{ crime }}">{{ crime }}</option>
+        <div class="custom-control custom-checkbox custom-control-inline">
+          <input type="checkbox" class="custom-control-input crimeBox" id="{{ crime }}" name="types[]" value="{{ crime }}">
+          <label class="custom-control-label" for="{{ crime }}">{{ crime }}</label>
+        </div>
         {% endfor %}
-      </select>
-    </div>
-  </div>
-  <div class="col-lg-4">
-    <div class="input-group mb-3">
-      <div class="input-group-prepend">
-        <label class="input-group-text success" for="inputGroupSelect01">Coefficient de Fourier - Semaine</label>
       </div>
-      <select class="custom-select" id="inputGroupSelect01">
+
+      {% csrf_token %}
+      <div class="col-md-4">
+        <b class="text-muted mb-3 mt-4 d-block">Type de lieu</b>
         {% for crime in crimes  %}
-        <option value="{{ crime }}">{{ crime }}</option>
+        <div class="custom-control custom-checkbox custom-control-inline">
+          <input type="checkbox" class="custom-control-input crimeBox" id="{{ crime }}" name="types[]" value="{{ crime }}">
+          <label class="custom-control-label" for="{{ crime }}">{{ crime }}</label>
+        </div>
         {% endfor %}
-      </select>
-    </div>
-  </div>
-  <div class="col-lg-4">
-    <div class="input-group mb-3">
-      <div class="input-group-prepend">
-        <label class="input-group-text success" for="inputGroupSelect01">Seasonalité hebdomadaire</label>
       </div>
-      <select class="custom-select" id="inputGroupSelect01">
+
+      {% csrf_token %}
+      <div class="col-md-4">
+        <b class="text-muted mb-3 mt-4 d-block">Type de lieu</b>
         {% for crime in crimes  %}
-        <option value="{{ crime }}">{{ crime }}</option>
+        <div class="custom-control custom-checkbox custom-control-inline">
+          <input type="checkbox" class="custom-control-input crimeBox" id="{{ crime }}" name="types[]" value="{{ crime }}">
+          <label class="custom-control-label" for="{{ crime }}">{{ crime }}</label>
+        </div>
         {% endfor %}
-      </select>
+      </div>
+
+      <div class="form-row">
+        <div class="col-md-4 mb-3">
+          <div class="form-group">
+            <label for="start_date" class="col-form-label">Start date</label>
+            <input class="form-control" name="startDate" type="date" value="2016-01-05" id="start_date">
+          </div>
+        </div>
+        <div class="col-md-4 mb-3">
+          <div class="form-group">
+            <label for="end_date" class="col-form-label">End date</label>
+            <input class="form-control" name="endDate" type="date" value="2016-03-05" id="end_date">
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary mt-4 pr-4 pl-4">Submit</button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div>
+    <select>
+      <option>Choose Color</option>
+      <option value="red">Red</option>
+      <option value="green">Green</option>
+      <option value="blue">Blue</option>
+    </select>
+  </div>
+  <div class="red box">You have selected <strong>red option</strong> so i am here</div>
+  <div class="green box">You have selected <strong>green option</strong> so i am here</div>
+  <div class="blue box">You have selected <strong>blue option</strong> so i am here</div>
+
+
+  <div class="row" >
+  </div>
+
+
+    <div class="container">
+      <label>Entrer la liste des dates des vacances</label>
+      <input type="text" class="form-control date" placeholder="Pick the multiple dates">
     </div>
-  </div>
-  </div>
+
+
+    <div class="col-lg-4">
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text success" for="inputGroupSelect01">Temperature</label>
+        </div>
+        <select class="custom-select" id="inputGroupSelect01">
+          {% for crime in crimes  %}
+          <option value="{{ crime }}">{{ crime }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text success" for="inputGroupSelect01">Coefficient de Fourier - Semaine</label>
+        </div>
+        <select class="custom-select" id="inputGroupSelect01">
+          {% for crime in crimes  %}
+          <option value="{{ crime }}">{{ crime }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text success" for="inputGroupSelect01">Seasonalité hebdomadaire</label>
+        </div>
+        <select class="custom-select" id="inputGroupSelect01">
+          {% for crime in crimes  %}
+          <option value="{{ crime }}">{{ crime }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    </div>
+  
 
   <div class="input-group mb-3">
     <div class="input-group-prepend">
@@ -60,41 +172,7 @@
   </select>
 
 
-  <div class="col-md-12">
-
-    <form action="{% url 'makeForecast'  %}" method="post" id="forecast_form">
-      {% csrf_token %}
-      <b class="text-muted mb-3 mt-4 d-block">Chapitres des infractions</b>
-      {% for Chapitre in listOfChapters  %}
-      <div class="custom-control custom-checkbox custom-control-inline">
-        <input type="checkbox" class="custom-control-input crimeBox" id="{{ Chapitre }}" name="types[]" value="{{ Chapitre }}">
-        <label class="custom-control-label" for="{{ Chapitre }}">{{ Chapitre }}</label>
-      </div>
-      {% endfor %}
-      <br>
-      <b class="text-muted mb-3 mt-4 d-block">Types des infractions</b>
-      {% for crime in crimes  %}
-      <div class="custom-control custom-checkbox custom-control-inline">
-        <input type="checkbox" class="custom-control-input crimeBox" id="{{ crime }}" name="types[]" value="{{ crime }}">
-        <label class="custom-control-label" for="{{ crime }}">{{ crime }}</label>
-      </div>
-      {% endfor %}
-      <div class="form-row">
-        <div class="col-md-4 mb-3">
-          <div class="form-group">
-            <label for="start_date" class="col-form-label">Start date</label>
-            <input class="form-control" name="startDate" type="date" value="2016-01-05" id="start_date">
-          </div>
-        </div>
-        <div class="col-md-4 mb-3">
-          <div class="form-group">
-            <label for="end_date" class="col-form-label">End date</label>
-            <input class="form-control" name="endDate" type="date" value="2016-03-05" id="end_date">
-          </div>
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary mt-4 pr-4 pl-4">Submit</button>
-
+  
       <!-- Plotly.js -->
     <div id="myDiv" style="height: 600px; width: 100%"></div>
     </form>
@@ -127,6 +205,27 @@
  <script type="text/javascript">
 
   $(document).ready(function () {
+
+   // For showing/hiding other methods based on the dropdown selection
+    $("select").change(function () {
+      $(this).find("option:selected").each(function () {
+        var optionValue = $(this).attr("value");
+        if (optionValue) {
+          $(".box").not("." + optionValue).hide();
+          $("." + optionValue).show();
+        } else {
+          $(".box").hide();
+        }
+      });
+    }).change();
+
+    // For multiple datepicker
+    $('.date').datepicker({
+      multidate: true,
+      format: 'dd-mm-yyyy'
+    });
+
+
     $('.js-example-basic-multiple').select2({
       placeholder: "Choisir un chapitre"
     });

@@ -27,9 +27,10 @@
     <link rel="stylesheet" href="{% static "/visual/lib/css/leaflet.css"%}">
     <link rel="stylesheet" href="{% static "/visual/lib/css/MarkerCluster.css"%}">
     <link rel="stylesheet" href="{% static "/visual/lib/css/MarkerCluster.Default.css"%}">
-         <link rel="stylesheet" href="{% static "/visual/css/custom.css"%}">
+    <link rel="stylesheet" href="{% static "/visual/css/custom.css"%}">
 
-
+    <!-- Multiple Datepicker -->
+    <link rel="stylesheet" href="{% static "/forecasting/css/datepicker.css" %}">
     <!-- modernizr css -->
     <script src="{% static "/visual/assets/js/vendor/modernizr-2.8.3.min.js"  %}"></script>
 </head>
@@ -64,7 +65,16 @@
                                     <li><a href="/vis/compare/">Compare Crimes</a></li>
                                 </ul>
                             </li>
-                            <li><a href="#"><i class="ti-map-alt"></i><span>Not expanding</span></a></li>
+                            <li class="active">
+                                <a href="javascript:void(0)" aria-expanded="true"><i class="ti-dashboard"></i><span>Dashboard</span></a>
+                                <ul class="collapse">
+                                    <li class="active"><a href="/predict/predict_type">Prévision</a></li>
+                                    <li><a href="/predict/other_forecasts">Autre méthodes</a></li>
+                                    <li><a href="/vis/heat-map/">Comparaison</a></li>
+                                    <li><a href="/vis/compare/">Compare Crimes</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#"><i class="ti-map-alt"></i><span>Instructions</span></a></li>
                             <li>
                                 <a href="javascript:void(0)" aria-expanded="true"><i class="fa fa-align-left"></i>
                                     <span>Multi
@@ -100,15 +110,8 @@
                             <span></span>
                             <span></span>
                         </div>
-                        <div class="search-box pull-left">
-                            <form action="#">
-                                <input type="text" name="search" placeholder="Search..." required>
-                                <i class="ti-search"></i>
-                            </form>
-                        </div>
                     </div>
                     <!-- profile info & task notification -->
- 
                 </div>
             </div>
             <!-- header area end -->
@@ -150,7 +153,7 @@
         <!-- footer area start-->
         <footer>
             <div class="footer-area">
-                <p>© Copyright 2018. All right reserved. Template by <a href="https://colorlib.com/wp/">Colorlib</a>.</p>
+                <p>© Tous droits réservés <a href="/vis/home/">CrimeAnalyzer</a>.</p>
             </div>
         </footer>
         <!-- footer area end-->

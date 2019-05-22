@@ -56,6 +56,7 @@ function forecastAll(records) {
   var trace2 = {
     x: x2,
     y: y2,
+
     mode: "lines+markers",
     type: "scatter",
     name: "taux prédit",
