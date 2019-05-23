@@ -19,8 +19,6 @@ function forecastChart(records) {
 
   var chart = am4core.create("firstForecast", am4charts.XYChart);
 
-  //var records = json_parse("{{records|escapejs}}");
-
   var data = [];
 
   for (i = 0; i < Object.size(records.forecast); i++) {

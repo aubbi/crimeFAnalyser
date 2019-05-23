@@ -49,12 +49,14 @@ function forecastAll(records) {
     number2 = records.forecast[i].yhat;
     date2 = records.forecast[i].ds;
     x2.push(date2);
+    console.log(x2);
     y2.push(number2);
   }
 
   var trace2 = {
     x: x2,
     y: y2,
+
     mode: "lines+markers",
     type: "scatter",
     name: "taux prédit",
