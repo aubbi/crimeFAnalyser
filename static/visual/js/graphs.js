@@ -23,7 +23,7 @@ function makeGraphs(records) {
 
     var dayOfWeek = ndx.dimension(function (d) {
         var day = d["Date"].getDay();
-        var name = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        var name = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
         return  name[day];
     });
 
@@ -79,7 +79,7 @@ function makeGraphs(records) {
         .transitionDuration(500)
         .x(d3.scaleTime().domain([minDate, maxDate]))
         .elasticY(true)
-        .yAxisLabel("number of crimes")
+        .yAxisLabel("nombe")
         .xAxisLabel("timeline")
         .turnOnControls(true)
         .brushOn(true)
@@ -168,9 +168,10 @@ function makeGraphs(records) {
     crimeMap
         .dimension(geoDim)
         .group(geoGroup)
-        .center([36.681,3.2])
-        .fitOnRender(true)
-        .fitOnRedraw(true)
+        .center([41.8781,-87.6298])
+        .zoom(9)
+        .fitOnRender(false)
+        .fitOnRedraw(false)
         .cluster(true)
         .brushOn(false);
 
@@ -182,7 +183,7 @@ function makeGraphs(records) {
 
     var map = L.map('map');
     var drawMap = function () {
-        map.setView([35.65, 3.3301],6);
+        map.setView([41.8781,-87.6298],9);
         mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
         L.tileLayer(
 			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -203,6 +204,14 @@ function makeGraphs(records) {
             blur: 20,
             maxZoom: 1,
         }).addTo(map);
+
+        var printer = L.easyPrint({
+      		title:'this is a title',
+      		sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
+      		filename: 'heatMap',
+      		exportOnly: true,
+		}).addTo(map);
+
 
         /*var normalMap = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				attribution: '&copy; ' + mapLink + ' Contributors',
@@ -293,7 +302,7 @@ function makeMap(records, id){
         crimeMap
             .dimension(geoDim)
             .group(geoGroup)
-            .center([36.681,3.2])
+            .center([41.8781,-87.6298])
             .fitOnRender(true)
             .valueAccessor(d => d.value['Primary_Type'])
             .popup(function (d, marker) {
@@ -402,7 +411,7 @@ function makeMap(records, id){
 };*/
 
 //this makes the heat map and updates it when using the filters.
-
+//added option to print the map
 function makeHeatMap(records, rendered) {
     if(rendered){
         //heatMap.invalidateSize();
@@ -411,10 +420,20 @@ function makeHeatMap(records, rendered) {
     };
     heatMap = L.map('map');
     //if(heatMap != undefined || heatMap != null)
+    //adding print map fonctionality
+    var printer = L.easyPrint({
+      		tileLayer: 'something',
+      		sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
+      		filename: 'heatMap',
+      		exportOnly: true,
+		}).addTo(heatMap);
+
+
+
     var ndx = crossfilter(records);
     var total = ndx.groupAll();
     var allDim = ndx.dimension(function (d) {return d;});
-        heatMap.setView([35.65, 3.3301],6);
+        heatMap.setView([41.8781,-87.6298],6);
         mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
         L.tileLayer(
 			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -547,8 +566,35 @@ function makeTableCorr(objects) {
     return html;
 }
 
+function makeClusteringResultsTable(records){
+
+    //var html = "<tr class="text-white"><th scope="col">"+title+"</th></tr>"
+    var html = '';
+    var k = 1;
+    for (var key in records){
+        html +="<tr><th>"+ k +"</th><th>";
+        x = records[key]
+        for (i=0; i<x.length; i++){
+            html+= x[i]+"; ";
+        }
+        html+= "</th>";
+        k++;
+    }
+
+    return html;
+
+}
 
 
+      // this function will generate a png file of the element provided by ID and save it as as output_name.png
+        function toPNG(id,output_name ) {
+            var options = {};
+            options.backgroundColor = '#ffffff';
+            options.selectorRemap = function(s) { return s.replace(/\.dc-chart/g, ''); };
+            var chart = document.getElementById(id).getElementsByTagName('svg')[0];
+            saveSvgAsPng(chart, output_name+'.png', options)
+
+        }
 
 
 
