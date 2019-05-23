@@ -6,7 +6,7 @@
                         <div class="card mt-2">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <h4 class="header-title mb-0"> Type of Crimes </h4>
+                                    <h4 class="header-title mb-0"> Type de crimes </h4>
                                 </div>
                                 <div id="crime-type"></div>
 
@@ -50,8 +50,14 @@
                             <div class="col-xl-12 col-lg-8">
                                 <div class="card mt-2">
                                     <div class="card-body" id="timeline-container">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h4 class="header-title mb-0">Timeline</h4>
+                                        <div class="row">
+                                            <div class="col-sm-8 d-flex justify-content-between align-items-center">
+                                                <h4 class="header-title mb-0">Timeline</h4>
+                                                <a class="reset" href="javascript:dc.filterAll();dc.redrawAll()"; style="display:none;">Reset</a>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <button class="pull-right btn btn-rounded btn-primary mb-3"  onclick="toPNG('time-chart', 'timeline')" ><span class="fa fa-download"></span></button>
+                                            </div>
                                         </div>
                                         <div  id="time-chart"></div>
                                     </div>
@@ -62,7 +68,15 @@
                             <div class="col-xl-4 col-lg-4 coin-distribution">
                                 <div class="card mt-2">
                                     <div class="card-body" id="pie-chart-container">
-                                        <h4 class="header-title mb-0">Arrest</h4>
+                                        <div class="row">
+                                            <div class="col-sm-8 ">
+                                                <h4 class="header-title mb-0">Taux d'arrestation</h4>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <button class="pull-right btn btn-rounded btn-primary mb-3"  onclick="toPNG('arrest', 'arrest-chart')" ><span class="fa fa-download"></span></button>
+                                            </div>
+                                        </div>
+
                                         <div id="arrest"></div>
                                     </div>
                                 </div>
@@ -70,7 +84,14 @@
                             <div class="col-xl-8 col-lg-6 coin-distribution">
                                 <div class="card mt-2">
                                     <div class="card-body" id="pie-chart-container">
-                                        <h4 class="header-title mb-0">Days of the week</h4>
+                                        <div class="row">
+                                            <div class="col-sm-8 ">
+                                                <h4 class="header-title mb-0">Distribution par jour</h4>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <button class="pull-right btn btn-rounded btn-primary mb-3"  onclick="toPNG('day-of-week-chart', 'jour-semaine')" ><span class="fa fa-download"></span></button>
+                                            </div>
+                                        </div>
                                         <div id="day-of-week-chart"></div>
                                     </div>
                                 </div>
@@ -82,7 +103,7 @@
                          <div class="col-xl-6 mt-2">
                             <div class="card">
                                 <div class="card-body">
-                                    <h4 class="header-title">Animations along lines</h4>
+                                    <h4 class="header-title">Heat-Map</h4>
                                     <div id="map" style="width: 550px; height: 380px"></div>
                                 </div>
                             </div>
@@ -90,7 +111,14 @@
                          <div class="col-xl-6 mt-2">
                             <div class="card">
                                 <div class="card-body">
-                                    <h4 class="header-title">Map with curved lines</h4>
+                                    <div class="row">
+                                            <div class="col-sm-8 ">
+                                                <h4 class="header-title mb-0">Distribution géographique</h4>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <button class="pull-right btn btn-rounded btn-primary mb-3"  onclick="toPNG('map2', 'jour-semaine')" ><span class="fa fa-download"></span></button>
+                                            </div>
+                                    </div>
                                     <div id="map2" style="width: 550px; height: 380px"></div>
                                 </div>
                             </div>

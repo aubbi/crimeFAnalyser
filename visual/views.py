@@ -14,6 +14,15 @@ from sklearn.cluster import KMeans, AgglomerativeClustering
 #from statsmodels.tsa.seasonal import seasonal_decompose
 from django.contrib.auth.decorators import login_required
 
+
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import scale
+import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
+
+
+
 @login_required
 def index(request):
     template = loader.get_template('visual/starter.html')
@@ -36,8 +45,10 @@ def showMap(request):
 
 @login_required
 def cluster(request):
-
     return render(request,'visual/clustering.html')
+
+def cluster_district(request):
+    return render(request, 'visual/districts_cluster.html')
 
 @login_required
 def showHeatMap(request):
@@ -193,7 +204,7 @@ def default(request):
 
 def defaultHome(request):
 
-    rawData = Crime.objects.filter(Date__range=['2016-01-01', '2016-12-31']).order_by('Date')[:1000]
+    rawData = Crime.objects.filter(Date__range=['2016-01-01', '2016-12-31']).order_by('Date')[:10000]
     result = []
     for i in rawData.values():
         i['Date'] = i['Date'].strftime('%m/%d/%Y')
@@ -233,7 +244,6 @@ def makeKmeans(request):
     for i, item in enumerate(result_kmeans):
         to_return_Kmeans[item].append(allTypes[i])
 
-    print(to_return_Kmeans)
 
 
     # clustering hiearchique
@@ -251,20 +261,45 @@ def makeKmeans(request):
     for i, item in enumerate(result_hiearchique):
         to_return_Hi[item].append(allTypes[i])
 
-    print(to_return_Hi)
 
 
     return HttpResponse(json.dumps({'hi':to_return_Hi,'kmeans':to_return_Kmeans}))
 
-def getCount(df, type, date):
-    x = pd.DataFrame(list(df[(df['Primary_Type'] ==type) & (df['Date']==date)].values))
-    if x.empty:
-        return 0
-    else:
-        return float(x[2].values)
+def clusterDistricts(request):
+    startDate = request.POST['startDate']
+    endDate = request.POST['endDate']
+    k = int(request.POST['numberClusters'])
 
+    df = pd.DataFrame(list(Crime.objects.filter(Date__range=[startDate, endDate]).values('Case_Number','Primary_Type','District')
+                            .annotate(count=Count('id'))))
+    crimeArray = df.groupby(['Primary_Type', 'District'])['District'].count().unstack()
+    crimeArray = crimeArray.transpose()
+    crimeArray = crimeArray.replace(np.nan, 0)
 
+    pca = PCA()
+    crimePCA = pca.fit(scale(crimeArray))
+    cumsum = crimePCA.explained_variance_ratio_.cumsum()
 
+    with plt.style.context('seaborn-whitegrid'):
+        plt.figure(figsize=(6, 4))
+
+        font = {'weight': 'bold',
+                'size': 18}
+
+        plt.rc('font', **font)
+
+        plt.plot(range(1, len(cumsum) + 1), cumsum, '-o', color='b')
+        plt.xlabel('Principal Component')
+        plt.ylabel('Cumulative Proportion')
+        plt.tight_layout()
+
+    buf = BytesIO()
+    plt.savefig(buf, format='png', dpi=300)
+    image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8').replace('\n', '')
+    buf.close()
+
+    #return JsonResponse({'image_base64':image_base64}, safe=False)
+    return redirect('/hello')
 
 
 
