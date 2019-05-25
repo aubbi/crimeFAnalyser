@@ -15,6 +15,7 @@ function makeGraphs(records) {
     var dateDim = ndx.dimension(function (d) { return d["Date"];});
     var crimeTypeDim = ndx.dimension(function (d) { return d["Primary_Type"];});
     var arrestDim = ndx.dimension(function(d){return d["Arrest"];});
+    var districtDim = ndx.dimension(function (d) {return d["District"]});
     var allDim = ndx.dimension(function (d) {return d;});
     var geoDim = ndx.dimension(function (d) {
         var x = d['Latitude']+','+d['Longitude'];
@@ -34,16 +35,13 @@ function makeGraphs(records) {
     var numRecordsByDate = dateDim.group();
     var arrestGroup = arrestDim.group();
     var crimeTypeGroup = crimeTypeDim.group();
+    var districtGroup = districtDim.group();
     var all = ndx.groupAll();
     var geoGroup = geoDim.group();
-
-
 
     //Define Values
     var minDate = dateDim.bottom(1)[0]["Date"];
     var maxDate = dateDim.top(1)[0]["Date"];
-
-
 
 
     //Charts
@@ -55,6 +53,7 @@ function makeGraphs(records) {
     var crimeMap = dc.leafletMarkerChart("#map2");
     var topCrimes = dc.pieChart("#top-crimes");
     var dayOfWeekChart = dc.rowChart('#day-of-week-chart');
+    var districtsChart = dc.barChart("#district-chart");
 
 
     numberRecordsND
@@ -62,14 +61,6 @@ function makeGraphs(records) {
         .valueAccessor(function (d) {return d;})
         .group(all);
 
-    /*var timelineHeight = window.innerHeight, timelineWidth = window.innerWidth *0.75;
-     window.addEventListener('resize', function(){
-        //timelineHeight =  document.getElementById('timeline-container').offsetHeight; timelineWidth = document.getElementById('timeline-container').offsetWidth;
-
-        timelineWidth = window.innerWidth *0.75;
-        timelineHeight = window.innerHeight;
-        console.log(timelineWidth*0.75);
-     });*/
 
     timeChart
         .width(900)
@@ -79,7 +70,8 @@ function makeGraphs(records) {
         .transitionDuration(500)
         .x(d3.scaleTime().domain([minDate, maxDate]))
         .elasticY(true)
-        .yAxisLabel("nombe")
+        .elasticX(true)
+        .yAxisLabel("nombre d'infractions")
         .xAxisLabel("timeline")
         .turnOnControls(true)
         .brushOn(true)
@@ -162,8 +154,21 @@ function makeGraphs(records) {
         //.fixedBarHeight(25)
         .elasticX(false)
         .turnOnControls(true)
-        .ordinalColors(['rgb(127,205,187)','rgb(65,182,196)','rgb(29,145,192)','rgb(34,94,168)','rgb(37,52,148)','rgb(8,29,88)'])
+        //.ordinalColors(['rgb(127,205,187)','rgb(65,182,196)','rgb(29,145,192)','rgb(34,94,168)','rgb(37,52,148)','rgb(8,29,88)'])
         .xAxis().ticks(5);
+
+    districtsChart
+        .margins({top: 0, right: 0, bottom: 20, left: 40})
+        .x(d3.scaleBand())
+        .xUnits(dc.units.ordinal)
+        .brushOn(false)
+        .dimension(districtDim)
+        .xAxisLabel('Region')
+        .yAxisLabel('Nombre d infraction')
+        .barPadding(0.1)
+        .elasticY(true)
+        .outerPadding(0.05)
+        .group(districtGroup);
 
     crimeMap
         .dimension(geoDim)
@@ -180,6 +185,7 @@ function makeGraphs(records) {
         .margins({top: 20, left: 10, right: 10, bottom: 20})
         .group(dayOfWeekGroup)
         .dimension(dayOfWeek)
+        .elasticX(true);
 
     var map = L.map('map');
     var drawMap = function () {
@@ -228,27 +234,6 @@ function makeGraphs(records) {
 
     };
 
-    /*var map2 = L.map('map2');
-    var drawMap2 = function () {
-        map2.setView([41.864,-87.706],10);
-        mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-         L.tileLayer(
-			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				attribution: '&copy; ' + mapLink + ' Contributors',
-				maxZoom: 15,
-			}).addTo(map2);
-
-
-
-        var markers = L.markerClusterGroup();
-        records.forEach(function (d) {
-            var marker  = L.marker(new L.LatLng(d['Latitude'],d['Longitude']), {title: d['Primary Type']});
-            marker.bindPopup(d['Primary Type']);
-            markers.addLayer(marker);
-        });
-        map2.addLayer(markers);
-
-    };*/
 
 
     drawMap();
@@ -265,12 +250,13 @@ function makeGraphs(records) {
 
     });
 
-    dc.renderAll();
+    //dc.renderAll();
 
     /*window.addEventListener('resize', function () {
         dc.renderAll();
 
     })*/
+    return [dc, ndx, dcCharts];
 }
 //this makes the normal map with markers clustered
 function makeMap(records, id){
@@ -596,7 +582,118 @@ function makeClusteringResultsTable(records){
 
         }
 
+function allDataGraphs(records) {
+    var parseTime = d3.timeParse("%m/%d/%Y");
 
+    records.forEach(function (d) {
+        d["Date"] = parseTime(d["Date"]);
+        d.month = d3.timeMonth(d["Date"]);
+    });
+
+    var moveChart = dc.lineChart('#monthly-move-chart');//line chart for showing details
+    var volumeChart = dc.barChart('#monthly-volume-chart');//bar chart to show resumed infos
+
+    var ndx = crossfilter(records);
+    //var all = ndx.groupAll();
+    var allDim = ndx.dimension(function (d) {return d;});
+
+    var dateDim = ndx.dimension(function (d) {
+        return d["Date"];
+    })
+
+
+
+    var yearlyDimension = ndx.dimension(function (d) {
+        return d3.timeYear(d["Date"]).getFullYear();
+    });
+
+    var moveMonths = ndx.dimension(function (d) {
+        return d.month;
+    });
+
+    var volumeByMonthGroup = moveMonths.group().reduceSum(function (d) {
+        return d['crimes_Count'];
+    });
+
+
+
+
+    moveChart /* dc.lineChart('#monthly-move-chart', 'chartGroup') */
+        .renderArea(true)
+        .width(990)
+        .height(200)
+        .transitionDuration(1000)
+        .margins({top: 30, right: 50, bottom: 25, left: 40})
+        .dimension(moveMonths)
+        .mouseZoomable(true)
+        .rangeChart(volumeChart)
+        .x(d3.scaleTime().domain([new Date(2012, 1, 1), new Date(2017, 1, 1)]))
+        .round(d3.timeMonth.round)
+        .xUnits(d3.timeMonths)
+        .elasticY(true)
+        .renderHorizontalGridLines(true)
+        .group(indexAvgByMonthGroup, 'Monthly Index Average')
+
+
+    volumeChart.width(990) /* dc.barChart('#monthly-volume-chart', 'chartGroup'); */
+        .height(40)
+        .margins({top: 0, right: 50, bottom: 20, left: 40})
+        .dimension(moveMonths)
+        .group(volumeByMonthGroup)
+        .centerBar(true)
+        .gap(1)
+        .x(d3.scaleTime().domain([new Date(2012, 1, 1), new Date(2017, 1, 1)]))
+        .round(d3.timeMonth.round)
+        .alwaysUseRounding(true)
+        .xUnits(d3.timeMonths);
+
+
+    dc.renderAll();
+
+};
+
+function makeSomething(records) {
+    var parseTime = d3.timeParse("%m/%d/%Y");
+
+    records.forEach(function (d) {
+        d["Date"] = parseTime(d["Date"]);
+        d.month = d3.timeMonth(d["Date"]);
+    });
+
+
+    var moveChart = dc.lineChart('#monthly-move-chart');//line chart for showing details
+
+    var ndx = crossfilter(records);
+
+    var dateDim = ndx.dimension(function (d) {return d["Date"];})
+    var minDate = dateDim.bottom(1)[0]["Date"];
+    var maxDate = dateDim.top(1)[0]["Date"];
+    console.log(minDate, maxDate);
+    var dateCount = dateDim.group().reduceSum(function (d) {return d["crimes_Count"]})
+
+    console.log(dateCount.top(1));
+    var countDim = ndx.dimension(function (d) {
+        return d["crimes_Count"];
+    })
+
+    moveChart /* dc.lineChart('#monthly-move-chart', 'chartGroup') */
+        .renderArea(true)
+        .width(990)
+        .height(200)
+        .transitionDuration(1000)
+        .margins({top: 30, right: 50, bottom: 25, left: 40})
+        .dimension(dateDim)
+        .mouseZoomable(true)
+        .x(d3.scaleTime().domain([new Date(2012, 1, 1), new Date(2017, 1, 1)]))
+        .round(d3.timeMonth.round)
+        .xUnits(d3.timeMonths)
+        .elasticY(true)
+        .renderHorizontalGridLines(true)
+        .group(dateCount)
+
+    moveChart.render();
+
+}
 
 
 

@@ -47,13 +47,29 @@
                         </div>
                     </div>
                 </div>
-                <div class="row" id="result">
+                <div class="row" id="result" style="visibility: hidden;">
                     <div class="col-xl-12 mt-2">
                         <div class="card">
                             <div class="card-body">
-                                <img src="data:image/png;base64,{{image_base64}}"
-                                     alt="some text to display to your users when the image does not show correctly"
-                                     width=500 height=auto />
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <a class="card-link" data-toggle="collapse" href="#accordion11" aria-expanded="true">Résultats intermédiaires</a>
+                                        </div>
+                                        <div id="accordion11" class="collapse hide" data-parent="#accordion1" style="">
+                                            <div class="card-body">
+                                                <div class="col-sm-6 offset-3">
+                                                    <div id="pca_result"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="" id="image_result">
+
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -77,8 +93,17 @@
                     endDate: $("#endDate").val(),
                 },
                 success : function (response) {
-                    alert('hey');
-                    console.log(response);
+                    var element  = document.getElementById('pca_result');
+                    element.innerHTML = '<image src="../../static/visual/images/graphs/pca_results.png">';
+
+                    var element1  = document.getElementById('image_result');
+                    element1.innerHTML = '<image src="../../static/visual/images/graphs/clustered_districts.png">';
+
+                    var element2 = document.getElementById('result');
+                    if(element2.style.visibility =='hidden'){
+                        element2.style.visibility = 'visible';
+                    };
+                    //console.log(response);
                 },
                 error : function (msg) {
                     alert('no response');

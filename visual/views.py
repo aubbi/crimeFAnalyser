@@ -9,6 +9,7 @@ import numpy as np
 from visual.models import Crime
 from django.db.models import Count, Sum, IntegerField
 from django.db.models.functions import Cast
+from datetime import datetime
 
 from sklearn.cluster import KMeans, AgglomerativeClustering
 #from statsmodels.tsa.seasonal import seasonal_decompose
@@ -18,10 +19,13 @@ from django.contrib.auth.decorators import login_required
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import scale
 import matplotlib.pyplot as plt
-from io import BytesIO
-import base64
+from random import randint
 
 
+listofCrimesGlobal=['Agression','Violation de l ordre publique','Vol','Infractions relative aux armes',
+'Vol de vehicule a  moteur','Autre infraction','Pratique deceptive','Dommage criminel','Transgression penale','Cambriolage',
+'Harcelement','Agression sexuelle','Narcotique','Infraction sexuelle','Autre','Infraction d enfants','Kidnapping','Jeu d argent','Incendie volontaire',
+'Vilation des liee a l alcool','Obscenite','Non penal','indecence publique','Trafic humain','Violation de licence de trasport','Autre violation narcotique']
 
 @login_required
 def index(request):
@@ -32,12 +36,25 @@ def index(request):
     return HttpResponse(template.render(context,request))
 
 @login_required
+def allDataPage(request):
+    return render(request, 'visual/allData.html')
+
+@login_required()
+def resumedData(request):
+
+    allData = pd.DataFrame(list(Crime.objects.all().values('Date','Primary_Type').annotate(crimes_Count=Count('id')).order_by('Date')))
+    #allData['Date'] = allData['Date'].dt.strftime('%Y-%m-%d')
+    allData['Date'].apply(lambda x: x.strftime('%m/%d/%Y'))
+    #print(type(allData))
+    #allData['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
+    jsonData = allData.to_json(orient='records')
+    #print(jsonData)
+    return JsonResponse({'data': jsonData})
+
+@login_required
 def showMap(request):
-    listOfCrimes = ['THEFT','BATTERY','CRIMINAL DAMAGE','ASSAULT','OTHER OFFENSE','NARCOTICS','DECEPTIVE PRACTICE',
-                    'MOTOR VEHICLE THEFT','ROBBERY','BURGLARY','CRIMINAL TRESPASS','WEAPONS VIOLATION',
-                    'OFFENSE INVOLVING CHILDREN','PUBLIC PEACE VIOLATION','CRIME SEXUAL ASSAULT','HOMOCIDE',
-                    'PROSTITUION','SEX OFFENSE','INTERFEREENCE WITH PUBLIC OFFICER','KIDNAPPING','ARSON','GAMBLING',
-                    'INTIMIDATING','LIQUOR LAW VIOLATION','STALKING']
+    global listofCrimesGlobal
+    listOfCrimes = listofCrimesGlobal
     context = {
         'crimes': listOfCrimes
     }
@@ -52,11 +69,8 @@ def cluster_district(request):
 
 @login_required
 def showHeatMap(request):
-    listOfCrimes = ['THEFT','BATTERY','CRIMINAL DAMAGE','ASSAULT','OTHER OFFENSE','NARCOTICS','DECEPTIVE PRACTICE',
-                    'MOTOR VEHICLE THEFT','ROBBERY','BURGLARY','CRIMINAL TRESPASS','WEAPONS VIOLATION',
-                    'OFFENSE INVOLVING CHILDREN','PUBLIC PEACE VIOLATION','CRIME SEXUAL ASSAULT','HOMOCIDE',
-                    'PROSTITUION','SEX OFFENSE','INTERFEREENCE WITH PUBLIC OFFICER','KIDNAPPING','ARSON','GAMBLING',
-                    'INTIMIDATING','LIQUOR LAW VIOLATION','STALKING']
+    global listofCrimesGlobal
+    listOfCrimes = listofCrimesGlobal
     context = {
         'crimes': listOfCrimes
     }
@@ -65,11 +79,8 @@ def showHeatMap(request):
 
 @login_required
 def compareCrimes(request):
-    listOfCrimes = ['THEFT','BATTERY','CRIMINAL DAMAGE','ASSAULT','OTHER OFFENSE','NARCOTICS','DECEPTIVE PRACTICE',
-                    'MOTOR VEHICLE THEFT','ROBBERY','BURGLARY','CRIMINAL TRESPASS','WEAPONS VIOLATION',
-                    'OFFENSE INVOLVING CHILDREN','PUBLIC PEACE VIOLATION','CRIME SEXUAL ASSAULT','HOMOCIDE',
-                    'PROSTITUION','SEX OFFENSE','INTERFEREENCE WITH PUBLIC OFFICER','KIDNAPPING','ARSON','GAMBLING',
-                    'INTIMIDATING','LIQUOR LAW VIOLATION','STALKING']
+    global listofCrimesGlobal
+    listOfCrimes = listofCrimesGlobal
     context = {
         'crimes': listOfCrimes
     }
@@ -78,6 +89,7 @@ def compareCrimes(request):
 
 dateSelected = 2016
 typesSelected = ['all']
+
 
 def getData(request):
     global dateSelected
@@ -124,7 +136,7 @@ def filterData(request):
     #return HttpResponse(rawData, content_type='application/json')
 
     return HttpResponse(json.dumps(result))
-
+#for crime comparaison
 def customFilter(request):
     types = request.POST.getlist('types[]')
     startDate = request.POST['startDate']
@@ -136,7 +148,8 @@ def customFilter(request):
 
     result = []
     for i in rawData:
-        i['Date'] = i['Date'].strftime('%m/%d/%Y')
+        #i['Date'] = i['Date'].strftime('%m/%d/%Y')
+        i['Date'] = i['Date'].strftime('%Y-%m-%d')
         result.append(i)
 
     myDict = {}
@@ -203,8 +216,18 @@ def default(request):
     return HttpResponse(getDataPerYear(dateSelected,typesSelected))
 
 def defaultHome(request):
+    rawData = Crime.objects.filter(Date__range=['2016-01-01', '2016-12-31']).order_by('Date')[:20000]
+    result = []
+    for i in rawData.values():
+        i['Date'] = i['Date'].strftime('%m/%d/%Y')
+        result.append(i)
+    return HttpResponse(json.dumps(result))
 
-    rawData = Crime.objects.filter(Date__range=['2016-01-01', '2016-12-31']).order_by('Date')[:1000]
+
+def customeHome(request):
+    startDate  = request.POST['startDate']
+    endDate = request.POST['endDate']
+    rawData = Crime.objects.filter(Date__range=[startDate, endDate]).order_by('Date')
     result = []
     for i in rawData.values():
         i['Date'] = i['Date'].strftime('%m/%d/%Y')
@@ -276,6 +299,7 @@ def clusterDistricts(request):
     crimeArray = crimeArray.transpose()
     crimeArray = crimeArray.replace(np.nan, 0)
 
+    #PCA analysis
     pca = PCA()
     crimePCA = pca.fit(scale(crimeArray))
     cumsum = crimePCA.explained_variance_ratio_.cumsum()
@@ -292,14 +316,68 @@ def clusterDistricts(request):
         plt.xlabel('Principal Component')
         plt.ylabel('Cumulative Proportion')
         plt.tight_layout()
+    plt.savefig('static/visual/images/graphs/pca_results.png')
 
-    buf = BytesIO()
-    plt.savefig(buf, format='png', dpi=300)
-    image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8').replace('\n', '')
-    buf.close()
+    pcDF = pd.DataFrame(crimePCA.components_[0:4])
+    pcDF = pcDF.transpose()
+    pcDF.columns = ['PC1', 'PC2', 'PC3', 'PC4']
+    indexes = crimeArray.columns.tolist()
+    pcDF.index = [indexes]
+    print(pcDF.sort_values(['PC1', 'PC2'], ascending=[False, False]))
 
-    #return JsonResponse({'image_base64':image_base64}, safe=False)
-    return redirect('/hello')
+
+    crimeProject = pca.fit_transform(scale(crimeArray))
+    sector = crimeArray.index.tolist()
+
+    crime2 = np.array(crimeProject[0, 0:2])
+    for i in range(1, len(sector)):
+        crime2 = np.vstack([crime2, crimeProject[i, 0:2]])
+
+    kmeans = KMeans(n_clusters=k, random_state=123, n_init=10).fit_predict(crime2)
+
+    colors = []
+    for i in range(k):
+        colors.append('#%06X' % randint(0, 0xFFFFFF))
+
+    kcolors = []
+    for i in kmeans:
+        kcolors.append(colors[i])
+
+    h = .02
+    x_min, x_max = crime2[:, 0].min() - 1, crime2[:, 0].max() + 1
+    y_min, y_max = crime2[:, 1].min() - 1, crime2[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+
+    kmesh = KMeans(n_clusters=k, random_state=123, n_init=10)
+    kmesh.fit(crime2)
+
+    kmeshPredict = kmesh.predict(np.c_[xx.ravel(), yy.ravel()])
+    kmeshPredict = kmeshPredict.reshape(xx.shape)
+
+    with plt.style.context('seaborn-whitegrid'):
+        plt.figure(figsize=(8, 8))
+
+        font = {'weight': 'bold',
+                'size': 22}
+
+        plt.rc('font', **font)
+
+        plt.imshow(kmeshPredict, interpolation='nearest',
+                   extent=(xx.min(), xx.max(), yy.min(), yy.max()),
+                   cmap=plt.cm.Paired, aspect='auto', origin='lower')
+
+        for i, labels in enumerate(sector):
+            plt.scatter(crime2[i, 0], crime2[i, 1], s=250, color=kcolors[i])
+            plt.annotate(labels, (crime2[i, 0], crime2[i, 1]))
+
+        plt.xlabel('Principal Component 1')
+        plt.ylabel('Principal Component 2')
+        plt.tight_layout()
+
+    plt.savefig('static/visual/images/graphs/clustered_districts.png')
+
+
+    return HttpResponse('/hello')
 
 
 
