@@ -1,61 +1,62 @@
 {% extends 'visual/base.html' %}
 
 {% block content %}
-<body class="keen-dashboard">
-  <br><br>
 
+<!-- Including local-used css -->
  
-  <div class="row"> 
-    <h4>Prévision de la criminalité</h4>
-    
-    <p>Pour une utilisation efficace de la fonctionnalité de prédiction, veuillez suivre les étapes suivantes:
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item">1. filtrer selon ce que vous voulez vos prédictions (Historique/Période/Type d'infraction/Type de lieu/Lieu)</li>
-      <li class="list-group-item">2. Choisissez la méthode de prévision que vous voulez</li>
-      <li class="list-group-item">3. Paramétrez le modèle selon le données (Lire la partie: Instruction pour plus de détails)</li>
-      <li class="list-group-item">4. Cliquez sur: Prévoir la criminalité</li>
-      <li class="list-group-item">5. Analyser et sauvegarder les résultats</li>
-    </ul>
-  </div>
-<br><br>
-<div class="row"><h2>1. Filtrage de données</h2></div>
-<br><br>
+<body class="keen-dashboard">
+<div class="jumbotron">
+  <h4 class="display-4">Prévision de la criminalité</h4>
+  <p class="lead">Pour une utilisation efficace de la fonctionnalité de prédiction, veuillez suivre les étapes suivantes:</p>
+  <hr class="my-4">
+  <p>1 => filtrer selon ce que vous voulez vos prédictions (Historique/Période/Type d'infraction/Type de lieu/Lieu)</p>
+  <p>2 => Choisissez la méthode de prévision que vous voulez</p>
+  <p>3 => Paramétrez le modèle selon le données (Lire la partie: Instruction pour plus de détails)</p>
+  <p>4 => Cliquez sur: Prévoir la criminalité</p>
+  <p>5 => Analyser et sauvegarder les résultats</p>
+</div>
+<br>
+
+
+<div class="">
+  <h4 class="display-8">1. Filtrage de données</h4>
+<div class="row">
+<br>
 <div class="row">
   <div class="col-md-12">
-    <form action="{% url 'makeForecast'  %}" method="post" id="forecast_form">
+    <br><br>
       {% csrf_token %}
-      <div class="col-md-4">
-        <b class="text-muted mb-3 mt-4 d-block">Types des infractions</b>
-        {% for crime in crimes  %}
-        <div class="custom-control custom-checkbox custom-control-inline">
-          <input type="checkbox" class="custom-control-input crimeBox" id="{{ crime }}" name="types[]" value="{{ crime }}">
-          <label class="custom-control-label" for="{{ crime }}">{{ crime }}</label>
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text success" for="inputGroupSelect01">Places</label>
         </div>
-        {% endfor %}
+        <select class="custom-select" id="inputGroupSelect01">
+          {% for crime in crimes  %}
+          <option value="{{ crime }}">{{ crime }}</option>
+          {% endfor %}
+        </select>
       </div>
-
       {% csrf_token %}
-      <div class="col-md-4">
-        <b class="text-muted mb-3 mt-4 d-block">Type de lieu</b>
-        {% for crime in crimes  %}
-        <div class="custom-control custom-checkbox custom-control-inline">
-          <input type="checkbox" class="custom-control-input crimeBox" id="{{ crime }}" name="types[]" value="{{ crime }}">
-          <label class="custom-control-label" for="{{ crime }}">{{ crime }}</label>
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text success" for="inputGroupSelect01">Type crime</label>
         </div>
-        {% endfor %}
+        <select class="custom-select" id="inputGroupSelect01">
+          {% for crime in crimes  %}
+          <option value="{{ crime }}">{{ crime }}</option>
+          {% endfor %}
+        </select>
       </div>
-
-      {% csrf_token %}
-      <div class="col-md-4">
-        <b class="text-muted mb-3 mt-4 d-block">Type de lieu</b>
-        {% for crime in crimes  %}
-        <div class="custom-control custom-checkbox custom-control-inline">
-          <input type="checkbox" class="custom-control-input crimeBox" id="{{ crime }}" name="types[]" value="{{ crime }}">
-          <label class="custom-control-label" for="{{ crime }}">{{ crime }}</label>
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <label class="input-group-text success" for="inputGroupSelect01">Type lieu</label>
         </div>
-        {% endfor %}
+        <select class="custom-select" id="inputGroupSelect01">
+          {% for crime in crimes  %}
+          <option value="{{ crime }}">{{ crime }}</option>
+          {% endfor %}
+        </select>
       </div>
-
       <div class="form-row">
         <div class="col-md-4 mb-3">
           <div class="form-group">
@@ -70,118 +71,108 @@
           </div>
         </div>
       </div>
-      <button type="submit" class="btn btn-primary mt-4 pr-4 pl-4">Submit</button>
+      <button type="submit" onclick="document.getElementById('choix').style.display = 'block' ;" class="btn btn-primary mt-4 pr-4 pl-4">Submit</button>
+    </div>
+  </div>
+</div>
 </div>
 
 
+<div class="jumbotron" id="choix" style="display: none;">
+  <h4 class="display-8">2. Choisissez la méthode de prévision que vous voulez</h4>
+  <div class="row">
+   <br>
+    <div>
+      <form>
+      <select>
+        <option value="Arima" onclick="document.getElementById('prophet').style.display = 'block' ;">prophet</option>
+        <option value="green" onclick="document.getElementById('arima').style.display = 'block' ;">arima</option>
+        <option value="blue" onclick="document.getElementById('ets').style.display = 'block' ;">ets</option>
+      </select>
+      </form>
+     </div>
+  </div>
+</div>
 
+<div class="" id="prophet" style="display: block;">
+  <h4 class="display-8">3. Paramétrage du modèle de prévision: Prophet</h4>
+  <div class="row">
 
+    <div class="col-lg-12 mt-5">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="header-title">Accordion 1</h4>
+          <div id="accordion3" class="according accordion-s3">
+            <div class="card">
+              <div class="card-header">
+                <a class="card-link collapsed" data-toggle="collapse" href="#accordion31" aria-expanded="false">Paramètres avancés</a>
+              </div>
+              <div id="accordion31" class="collapse" data-parent="#accordion3" style="">
+                <div class="card-body">
+                 Here goes the parameters of the system
+                    <div class="container">
+                      <label>Entrer la liste des dates des vacances</label>
+                      <input type="text" class="form-control date" placeholder="Pick the multiple dates">
+                    </div>
+                    <div class="col-lg-4">
+                      <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                          <label class="input-group-text success" for="inputGroupSelect01">Seasonalité hebdomadaire</label>
+                        </div>
+                        <select class="custom-select" id="inputGroupSelect01">
+                          {% for crime in crimes  %}
+                          <option value="{{ crime }}">{{ crime }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+        <button type="submit" class="btn btn-primary mt-4 pr-4 pl-4">Submit</button>
+      </div>
   <div>
-    <select>
-      <option>Choose Color</option>
-      <option value="red">Red</option>
-      <option value="green">Green</option>
-      <option value="blue">Blue</option>
-    </select>
+
+
+    </div>
   </div>
-  <div class="red box">You have selected <strong>red option</strong> so i am here</div>
-  <div class="green box">You have selected <strong>green option</strong> so i am here</div>
-  <div class="blue box">You have selected <strong>blue option</strong> so i am here</div>
+</div>
 
-
-  <div class="row" >
+<div class="jumbotron"  id="arima" id="arima" style="display: none;">
+  <h4 class="display-8">3. Auto.ARIMA</h4>
+  <div class="row">
+    <p></p>
+    <div>
+    </div>
   </div>
+</div>
 
-
-    <div class="container">
-      <label>Entrer la liste des dates des vacances</label>
-      <input type="text" class="form-control date" placeholder="Pick the multiple dates">
+<div class="jumbotron" id = "ets" id="ets" style="display: none;">
+  <h4 class="display-8">3. ETS</h4>
+  <div class="row">
+    <p></p>
+    <div>
     </div>
-
-
-    <div class="col-lg-4">
-      <div class="input-group mb-3">
-        <div class="input-group-prepend">
-          <label class="input-group-text success" for="inputGroupSelect01">Temperature</label>
-        </div>
-        <select class="custom-select" id="inputGroupSelect01">
-          {% for crime in crimes  %}
-          <option value="{{ crime }}">{{ crime }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="input-group mb-3">
-        <div class="input-group-prepend">
-          <label class="input-group-text success" for="inputGroupSelect01">Coefficient de Fourier - Semaine</label>
-        </div>
-        <select class="custom-select" id="inputGroupSelect01">
-          {% for crime in crimes  %}
-          <option value="{{ crime }}">{{ crime }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="input-group mb-3">
-        <div class="input-group-prepend">
-          <label class="input-group-text success" for="inputGroupSelect01">Seasonalité hebdomadaire</label>
-        </div>
-        <select class="custom-select" id="inputGroupSelect01">
-          {% for crime in crimes  %}
-          <option value="{{ crime }}">{{ crime }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-    </div>
-  
-
-  <div class="input-group mb-3">
-    <div class="input-group-prepend">
-      <label class="input-group-text success" for="inputGroupSelect01">Temperature</label>
-    </div>
-    <select class="custom-select" id="inputGroupSelect01">
-      {% for crime in crimes  %}
-      <option value="{{ crime }}">{{ crime }}</option>
-      {% endfor %}
-    </select>
   </div>
+</div>
 
-  <select style="width: 100%;"  class="js-example-basic-multiple" name="states[]" multiple="multiple">
-    {% for crime in crimes  %}
-    <option value="{{ crime }}">{{ crime }}</option>
-    {% endfor %}
-  </select>
+<div class="jumbotron" id="viz">
+  <!-- Plotly.js -->
+  <div id="myDiv" style="height: 600px; width: 100%"></div>
+  </form>
+  <div class="row">
+    <div style="height: 600px; width: 100%" id="firstForecast"></div>
+  </div>
+  <div class="row">
+    <div style="height: 600px; width: 100%" id="chartdiv"></div>
+  </div>
+</div>
 
-
-  
-      <!-- Plotly.js -->
-    <div id="myDiv" style="height: 600px; width: 100%"></div>
-    </form>
-    <div class="row" >
-      <div style="height: 600px; width: 100%" id="firstForecast"></div>
-    </div>
-    <div class="row">
-      <div style="height: 600px; width: 100%" id="chartdiv"></div>
-    </div>
 {% endblock %}
 
 {% block scripts %}
@@ -189,23 +180,19 @@
 <script src="https://www.amcharts.com/lib/4/core.js"></script>
 <script src="https://www.amcharts.com/lib/4/charts.js"></script>
 <script src="https://www.amcharts.com/lib/4/themes/material.js"></script>
-
 <script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
 <script src="https://www.amcharts.com/lib/3/serial.js"></script>
 <script src="https://www.amcharts.com/lib/3/themes/light.js"></script>
 <script src="https://www.amcharts.com/lib/3/lang/fr.js"></script>
 <script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
 <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />
-
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 
  <script type="text/javascript">
 
   $(document).ready(function () {
-
    // For showing/hiding other methods based on the dropdown selection
     $("select").change(function () {
       $(this).find("option:selected").each(function () {
@@ -219,17 +206,18 @@
       });
     }).change();
 
+    $('.js-example-basic-multiple').select2();
+
     // For multiple datepicker
     $('.date').datepicker({
       multidate: true,
       format: 'dd-mm-yyyy'
     });
 
-
     $('.js-example-basic-multiple').select2({
-      placeholder: "Choisir un chapitre"
+      placeholder: "Choisir un chapitre";
     });
-  });
+
     var token = '{{csrf_token}}';
     $(document).on('submit', '#forecast_form', function (e) {
 
@@ -264,6 +252,19 @@
         }
       });
     });
+
+
+
+    $(function () {
+      $('#colorselector').change(function () {
+        $('.colors').hide();
+        $('#' + $(this).val()).show();
+      });
+    });
+
+
+
+  });
   </script>
   {% endblock %}
   </body>

@@ -48,16 +48,9 @@ def makeForecast(request):
     crimes = data.sort_values(by='ds')
     crimes.reset_index(inplace=True)
     crimes['ds'] = crimes.ds.astype(str)
-    # crimes['ds'] = crimes['ds'].dt.strftime('%Y-%m-%d')
-    # for i in rawData.values():
-    #     i['Date'] = i['Date'].strftime('%m/%d/%Y')
-    #     result.append(i)
-
-    # create a Prophet model
+    
     m = Prophet()
-    # # fit the dataframe to the Prophet model
     m.fit(crimes)
-    # create a new period to forecast
     future = m.make_future_dataframe(periods=10)
     # making the forecast
     forecast = m.predict(future)
