@@ -4,7 +4,7 @@ from . import views
 
 
 urlpatterns = [
-    path('predict_prophet/', views.predictCrimes, name='showForecast'),
+    path('make/', views.predictCrimes, name='showForecast'),
     url(r'^makeForecast', views.makeForecast, name="makeForecast"),
     path('instructions/', views.makeForecast, name='instructions'),
     url(r'^makeOtherForecast', views.makeOtherForecasts, name="makeOtherForecasts"),

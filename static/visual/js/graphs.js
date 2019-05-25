@@ -1,68 +1,68 @@
-
-
 function makeGraphs(records) {
+  //var parseTime = d3.timeParse("%Y-%m-%d");
+  var parseTime = d3.timeParse("%m/%d/%Y");
 
-    //var parseTime = d3.timeParse("%Y-%m-%d");
-    var parseTime = d3.timeParse("%m/%d/%Y");
+  records.forEach(function(d) {
+    d["Date"] = parseTime(d["Date"]);
+  });
 
-    records.forEach(function (d) {
-        d["Date"] = parseTime(d["Date"]);
-    });
+  var ndx = crossfilter(records);
 
-    var ndx = crossfilter(records);
+  //Define Dimensions
+  var dateDim = ndx.dimension(function(d) {
+    return d["Date"];
+  });
+  var crimeTypeDim = ndx.dimension(function(d) {
+    return d["Primary_Type"];
+  });
+  var arrestDim = ndx.dimension(function(d) {
+    return d["Arrest"];
+  });
+  var allDim = ndx.dimension(function(d) {
+    return d;
+  });
+  var geoDim = ndx.dimension(function(d) {
+    var x = d["Latitude"] + "," + d["Longitude"];
+    return x;
+  });
 
-    //Define Dimensions
-    var dateDim = ndx.dimension(function (d) { return d["Date"];});
-    var crimeTypeDim = ndx.dimension(function (d) { return d["Primary_Type"];});
-    var arrestDim = ndx.dimension(function(d){return d["Arrest"];});
-    var allDim = ndx.dimension(function (d) {return d;});
-    var geoDim = ndx.dimension(function (d) {
-        var x = d['Latitude']+','+d['Longitude'];
-        return x;
-    });
+  var dayOfWeek = ndx.dimension(function(d) {
+    var day = d["Date"].getDay();
+    var name = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+    return name[day];
+  });
 
-    var dayOfWeek = ndx.dimension(function (d) {
-        var day = d["Date"].getDay();
-        var name = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-        return  name[day];
-    });
+  var dayOfWeekGroup = dayOfWeek.group();
 
-    var dayOfWeekGroup = dayOfWeek.group();
+  //Group data
+  var numRecordsByDate = dateDim.group();
+  var arrestGroup = arrestDim.group();
+  var crimeTypeGroup = crimeTypeDim.group();
+  var all = ndx.groupAll();
+  var geoGroup = geoDim.group();
 
+  //Define Values
+  var minDate = dateDim.bottom(1)[0]["Date"];
+  var maxDate = dateDim.top(1)[0]["Date"];
 
-    //Group data
-    var numRecordsByDate = dateDim.group();
-    var arrestGroup = arrestDim.group();
-    var crimeTypeGroup = crimeTypeDim.group();
-    var all = ndx.groupAll();
-    var geoGroup = geoDim.group();
+  //Charts
+  var numberRecordsND = dc.numberDisplay("#number-records");
+  var timeChart = dc.lineChart("#time-chart");
+  //var arrestChart = dc.rowChart("#arrest");
+  var arrestChart = dc.pieChart("#arrest");
+  var crimeTypeChart = dc.rowChart("#crime-type");
+  var crimeMap = dc.leafletMarkerChart("#map2");
+  var topCrimes = dc.pieChart("#top-crimes");
+  var dayOfWeekChart = dc.rowChart("#day-of-week-chart");
 
+  numberRecordsND
+    .formatNumber(d3.format("d"))
+    .valueAccessor(function(d) {
+      return d;
+    })
+    .group(all);
 
-
-    //Define Values
-    var minDate = dateDim.bottom(1)[0]["Date"];
-    var maxDate = dateDim.top(1)[0]["Date"];
-
-
-
-
-    //Charts
-    var numberRecordsND = dc.numberDisplay("#number-records");
-    var timeChart = dc.lineChart("#time-chart");
-    //var arrestChart = dc.rowChart("#arrest");
-    var arrestChart = dc.pieChart("#arrest");
-    var crimeTypeChart = dc.rowChart("#crime-type");
-    var crimeMap = dc.leafletMarkerChart("#map2");
-    var topCrimes = dc.pieChart("#top-crimes");
-    var dayOfWeekChart = dc.rowChart('#day-of-week-chart');
-
-
-    numberRecordsND
-        .formatNumber(d3.format("d"))
-        .valueAccessor(function (d) {return d;})
-        .group(all);
-
-    /*var timelineHeight = window.innerHeight, timelineWidth = window.innerWidth *0.75;
+  /*var timelineHeight = window.innerHeight, timelineWidth = window.innerWidth *0.75;
      window.addEventListener('resize', function(){
         //timelineHeight =  document.getElementById('timeline-container').offsetHeight; timelineWidth = document.getElementById('timeline-container').offsetWidth;
 
@@ -71,36 +71,47 @@ function makeGraphs(records) {
         console.log(timelineWidth*0.75);
      });*/
 
-    timeChart
-        .width(900)
-        .height(300)
-        .dimension(dateDim)
-        .group(numRecordsByDate)
-        .transitionDuration(500)
-        .x(d3.scaleTime().domain([minDate, maxDate]))
-        .elasticY(true)
-        .yAxisLabel("nombe")
-        .xAxisLabel("timeline")
-        .turnOnControls(true)
-        .brushOn(true)
-        .valueAccessor(function (d) {
-            return d.value;
-        })
-        .renderHorizontalGridLines(true)
-        .filterPrinter(function (filters) {
-                        var filter = filters[0], s = "";
-                        var dateObj = new Date(filter[0]);
-                        var dateObj1 = new Date(filter[1]);
-                            s += dateObj.getDate()+"/"+(dateObj.getMonth()+1)+"/"+ (dateObj.getFullYear()) + " - " +
-                            dateObj1.getDate()+"/"+(dateObj1.getMonth()+1)+"/"+ (dateObj1.getFullYear());
-                        return s;
-                    })
-        .yAxis().ticks(4);
+  timeChart
+    .width(900)
+    .height(300)
+    .dimension(dateDim)
+    .group(numRecordsByDate)
+    .transitionDuration(500)
+    .x(d3.scaleTime().domain([minDate, maxDate]))
+    .elasticY(true)
+    .yAxisLabel("nombe")
+    .xAxisLabel("timeline")
+    .turnOnControls(true)
+    .brushOn(true)
+    .valueAccessor(function(d) {
+      return d.value;
+    })
+    .renderHorizontalGridLines(true)
+    .filterPrinter(function(filters) {
+      var filter = filters[0],
+        s = "";
+      var dateObj = new Date(filter[0]);
+      var dateObj1 = new Date(filter[1]);
+      s +=
+        dateObj.getDate() +
+        "/" +
+        (dateObj.getMonth() + 1) +
+        "/" +
+        dateObj.getFullYear() +
+        " - " +
+        dateObj1.getDate() +
+        "/" +
+        (dateObj1.getMonth() + 1) +
+        "/" +
+        dateObj1.getFullYear();
+      return s;
+    })
+    .yAxis()
+    .ticks(4);
 
-    //apply_resizing(timeChart,0.7,0.35, 50, 50);
+  //apply_resizing(timeChart,0.7,0.35, 50, 50);
 
-
-   /*arrestChart
+  /*arrestChart
         .width(300)
         .height(100)
         .dimension(arrestDim)
@@ -110,7 +121,7 @@ function makeGraphs(records) {
         .elasticX(true)
         .xAxis().ticks(4);*/
 
-    /*var containerHeight=240, containerWidth=220;
+  /*var containerHeight=240, containerWidth=220;
 
     window.addEventListener('resize', function(){
         containerHeight =  document.getElementById('pie-chart-container').clientHeight; containerWidth = document.getElementById('pie-chart-container').clientWidth;
@@ -118,102 +129,121 @@ function makeGraphs(records) {
 
   //var adjustX = 20, adjustY = 40;
 
-   arrestChart
-        .width(200)
-        .height(250)
-        .slicesCap(4)
-        .innerRadius(40)
-        .dimension(arrestDim)
-        .group(arrestGroup)
-        .turnOnControls(true)
-        .legend(dc.legend())
-        .on('pretransition', function(chart) {
-        chart.selectAll('text.pie-slice').text(function(d) {
-            return d.data.key + ' ' + dc.utils.printSingleValue((d.endAngle - d.startAngle) / (2*Math.PI) * 100) + '%';
-        })
-         });
+  arrestChart
+    .width(200)
+    .height(250)
+    .slicesCap(4)
+    .innerRadius(40)
+    .dimension(arrestDim)
+    .group(arrestGroup)
+    .turnOnControls(true)
+    .legend(dc.legend())
+    .on("pretransition", function(chart) {
+      chart.selectAll("text.pie-slice").text(function(d) {
+        return (
+          d.data.key +
+          " " +
+          dc.utils.printSingleValue(
+            ((d.endAngle - d.startAngle) / (2 * Math.PI)) * 100
+          ) +
+          "%"
+        );
+      });
+    });
 
-    //apply_resizing(arrestChart, 20, 40);
+  //apply_resizing(arrestChart, 20, 40);
 
-   topCrimes
-       .width(250)
-       .height(250)
-       .slicesCap(4)
-       .innerRadius(50)
-       .dimension(crimeTypeDim)
-       .group(crimeTypeGroup)
-       .slicesCap(4)
-       .on('pretransition', function(chart) {
-       chart.selectAll('text.pie-slice').text(function(d) {
-            return d.data.key + ' ' + dc.utils.printSingleValue((d.endAngle - d.startAngle) / (2*Math.PI) * 100) + '%';
-       })
-        });
-    var numberOfTypes=0;
-    numberOfTypes = crimeTypeGroup.all().length+1;
+  topCrimes
+    .width(250)
+    .height(250)
+    .slicesCap(4)
+    .innerRadius(50)
+    .dimension(crimeTypeDim)
+    .group(crimeTypeGroup)
+    .slicesCap(4)
+    .on("pretransition", function(chart) {
+      chart.selectAll("text.pie-slice").text(function(d) {
+        return (
+          d.data.key +
+          " " +
+          dc.utils.printSingleValue(
+            ((d.endAngle - d.startAngle) / (2 * Math.PI)) * 100
+          ) +
+          "%"
+        );
+      });
+    });
+  var numberOfTypes = 0;
+  numberOfTypes = crimeTypeGroup.all().length + 1;
 
-    crimeTypeChart
-        .height(24*30)
-        .margins({top: 10, right: 50, bottom: 30, left: 10})
-        .dimension(crimeTypeDim)
-        .group(crimeTypeGroup)
-        .ordering(function(d) { return -d.value })
-        .gap(2)
-        .rowsCap(20)//to limit the number of rows you wanna display
-        //.fixedBarHeight(25)
-        .elasticX(false)
-        .turnOnControls(true)
-        .ordinalColors(['rgb(127,205,187)','rgb(65,182,196)','rgb(29,145,192)','rgb(34,94,168)','rgb(37,52,148)','rgb(8,29,88)'])
-        .xAxis().ticks(5);
+  crimeTypeChart
+    .height(24 * 30)
+    .margins({ top: 10, right: 50, bottom: 30, left: 10 })
+    .dimension(crimeTypeDim)
+    .group(crimeTypeGroup)
+    .ordering(function(d) {
+      return -d.value;
+    })
+    .gap(2)
+    .rowsCap(20) //to limit the number of rows you wanna display
+    //.fixedBarHeight(25)
+    .elasticX(false)
+    .turnOnControls(true)
+    .ordinalColors([
+      "rgb(127,205,187)",
+      "rgb(65,182,196)",
+      "rgb(29,145,192)",
+      "rgb(34,94,168)",
+      "rgb(37,52,148)",
+      "rgb(8,29,88)"
+    ])
+    .xAxis()
+    .ticks(5);
 
-    crimeMap
-        .dimension(geoDim)
-        .group(geoGroup)
-        .center([41.8781,-87.6298])
-        .zoom(9)
-        .fitOnRender(false)
-        .fitOnRedraw(false)
-        .cluster(true)
-        .brushOn(false);
+  crimeMap
+    .dimension(geoDim)
+    .group(geoGroup)
+    .center([41.8781, -87.6298])
+    .zoom(9)
+    .fitOnRender(false)
+    .fitOnRedraw(false)
+    .cluster(true)
+    .brushOn(false);
 
-    dayOfWeekChart
-        .height(250)
-        .margins({top: 20, left: 10, right: 10, bottom: 20})
-        .group(dayOfWeekGroup)
-        .dimension(dayOfWeek)
+  dayOfWeekChart
+    .height(250)
+    .margins({ top: 20, left: 10, right: 10, bottom: 20 })
+    .group(dayOfWeekGroup)
+    .dimension(dayOfWeek);
 
-    var map = L.map('map');
-    var drawMap = function () {
-        map.setView([41.8781,-87.6298],9);
-        mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-        L.tileLayer(
-			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				attribution: '&copy; ' + mapLink + ' Contributors',
-				maxZoom: 15,
-			}).addTo(map);
+  var map = L.map("map");
+  var drawMap = function() {
+    map.setView([41.8781, -87.6298], 9);
+    mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+    L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; " + mapLink + " Contributors",
+      maxZoom: 15
+    }).addTo(map);
 
+    //HeatMap
+    var geoData = [];
+    _.each(allDim.top(Infinity), function(d) {
+      geoData.push([d["Latitude"], d["Longitude"]]);
+    });
+    var heat = L.heatLayer(geoData, {
+      radius: 10,
+      blur: 20,
+      maxZoom: 1
+    }).addTo(map);
 
+    var printer = L.easyPrint({
+      title: "this is a title",
+      sizeModes: ["Current", "A4Landscape", "A4Portrait"],
+      filename: "heatMap",
+      exportOnly: true
+    }).addTo(map);
 
-        //HeatMap
-        var geoData = [];
-        _.each(allDim.top(Infinity), function (d){
-
-            geoData.push([d["Latitude"], d["Longitude"]]);
-        });
-        var heat = L.heatLayer(geoData, {
-            radius: 10,
-            blur: 20,
-            maxZoom: 1,
-        }).addTo(map);
-
-        var printer = L.easyPrint({
-      		title:'this is a title',
-      		sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
-      		filename: 'heatMap',
-      		exportOnly: true,
-		}).addTo(map);
-
-
-        /*var normalMap = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    /*var normalMap = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				attribution: '&copy; ' + mapLink + ' Contributors',
 				maxZoom: 13,
 			});
@@ -225,10 +255,9 @@ function makeGraphs(records) {
             markers.addLayer(marker);
         });
         map.addLayer(markers);*/
+  };
 
-    };
-
-    /*var map2 = L.map('map2');
+  /*var map2 = L.map('map2');
     var drawMap2 = function () {
         map2.setView([41.864,-87.706],10);
         mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
@@ -250,66 +279,68 @@ function makeGraphs(records) {
 
     };*/
 
+  drawMap();
+  //drawMap2();
+  dcCharts = [timeChart, arrestChart, crimeTypeChart, crimeMap];
 
-    drawMap();
-    //drawMap2();
-   dcCharts = [timeChart, arrestChart, crimeTypeChart, crimeMap];
-
-    _.each(dcCharts, function (dcChart) {
-        dcChart.on("filtered", function(chart, filter){
-            map.eachLayer(function (layer) {
-                map.removeLayer(layer)
-            });
-            drawMap();
-        });
-
+  _.each(dcCharts, function(dcChart) {
+    dcChart.on("filtered", function(chart, filter) {
+      map.eachLayer(function(layer) {
+        map.removeLayer(layer);
+      });
+      drawMap();
     });
+  });
 
-    dc.renderAll();
+  dc.renderAll();
 
-    /*window.addEventListener('resize', function () {
+  /*window.addEventListener('resize', function () {
         dc.renderAll();
 
     })*/
 }
 //this makes the normal map with markers clustered
-function makeMap(records, id){
-    var crimeMap = dc.leafletMarkerChart("#"+id);
-        var ndx = crossfilter(records);
+function makeMap(records, id) {
+  var crimeMap = dc.leafletMarkerChart("#" + id);
+  var ndx = crossfilter(records);
 
-        var geoDim = ndx.dimension(function (d) {
-            return d['Latitude']+','+d['Longitude'];
+  var geoDim = ndx.dimension(function(d) {
+    return (
+      "Localisation du crime: " +
+      d["Latitude"] +
+      "," +
+      d["Longitude"] +
+      "\n Date de l'occurrence: " +
+      d["Date"]
+    );
+  });
 
-        });
+  var geoGroup = geoDim.group().reduce(
+    function(p, v) {
+      p.Primary_Type = v.Primary_Type;
+      p.Arrest = v.Arrest;
+      ++p.count;
+      return p;
+    },
+    function(p, v) {
+      --p.count;
+      return p;
+    },
+    function() {
+      return { count: 0 };
+    }
+  );
 
-        var geoGroup = geoDim.group().reduce(
-            function(p, v) {
-              p.Primary_Type = v.Primary_Type;
-              p.Arrest = v.Arrest;
-              ++p.count;
-              return p;
-          },
-          function(p, v) {
-              --p.count;
-              return p;
-          },
-          function() {
-              return {count: 0};
-          }
-                );
-
-
-        crimeMap
-            .dimension(geoDim)
-            .group(geoGroup)
-            .center([41.8781,-87.6298])
-            .fitOnRender(true)
-            .valueAccessor(d => d.value['Primary_Type'])
-            .popup(function (d, marker) {
-
-                return d.value['Primary_Type']+ ', Arrest : '+ d.value['Arrest'];
-            })
-            /*.icon(function(d,map) {
+  crimeMap
+    .dimension(geoDim)
+    .group(geoGroup)
+    .center([41.8781, -87.6298])
+    .fitOnRender(true)
+    .valueAccessor(d => d.value["Primary_Type"])
+    .popup(function(d, marker) {
+      return d.value["Primary_Type"] + ", Arrest : " + d.value["Arrest"];
+    })
+    /*.icon(function(d,map) {
                 var iconUrl;
                 console.log('hello babe');
                 console.log(d.value.Primary_Type);
@@ -331,12 +362,10 @@ function makeMap(records, id){
                     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png'
                 });
             })*/
-            .fitOnRedraw(true)
-            .cluster(true);
-       crimeMap.render();
-
-};
-
+    .fitOnRedraw(true)
+    .cluster(true);
+  crimeMap.render();
+}
 
 //this make a map with a different markers for each type of crime
 /*function makeMap(records, id){
@@ -413,198 +442,211 @@ function makeMap(records, id){
 //this makes the heat map and updates it when using the filters.
 //added option to print the map
 function makeHeatMap(records, rendered) {
-    if(rendered){
-        //heatMap.invalidateSize();
-        heatMap.remove();
+  if (rendered) {
+    //heatMap.invalidateSize();
+    heatMap.remove();
+  }
+  heatMap = L.map("map");
+  //if(heatMap != undefined || heatMap != null)
+  //adding print map fonctionality
+  var printer = L.easyPrint({
+    tileLayer: "something",
+    sizeModes: ["Current", "A4Landscape", "A4Portrait"],
+    filename: "heatMap",
+    exportOnly: true
+  }).addTo(heatMap);
 
-    };
-    heatMap = L.map('map');
-    //if(heatMap != undefined || heatMap != null)
-    //adding print map fonctionality
-    var printer = L.easyPrint({
-      		tileLayer: 'something',
-      		sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
-      		filename: 'heatMap',
-      		exportOnly: true,
-		}).addTo(heatMap);
+  var ndx = crossfilter(records);
+  var total = ndx.groupAll();
+  var allDim = ndx.dimension(function(d) {
+    return d;
+  });
+  heatMap.setView([41.8781, -87.6298], 6);
+  mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+  L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; " + mapLink + " Contributors",
+    maxZoom: 15
+  }).addTo(heatMap);
 
+  //HeatMap
+  var geoData = [];
+  _.each(allDim.top(Infinity), function(d) {
+    geoData.push([d["Latitude"], d["Longitude"]]);
+  });
+  var heat = L.heatLayer(geoData, {
+    radius: 10,
+    blur: 20,
+    maxZoom: 1
+  }).addTo(heatMap);
 
+  var numberRecords = dc.numberDisplay("#total-number");
 
-    var ndx = crossfilter(records);
-    var total = ndx.groupAll();
-    var allDim = ndx.dimension(function (d) {return d;});
-        heatMap.setView([41.8781,-87.6298],6);
-        mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-        L.tileLayer(
-			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				attribution: '&copy; ' + mapLink + ' Contributors',
-				maxZoom: 15,
-			}).addTo(heatMap);
+  numberRecords
+    .formatNumber(d3.format("d"))
+    .valueAccessor(function(d) {
+      return d;
+    })
+    .group(total);
 
-
-
-        //HeatMap
-        var geoData = [];
-        _.each(allDim.top(Infinity), function (d){
-
-            geoData.push([d["Latitude"], d["Longitude"]]);
-        });
-        var heat = L.heatLayer(geoData, {
-            radius: 10,
-            blur: 20,
-            maxZoom: 1,
-        }).addTo(heatMap);
-
-        var numberRecords = dc.numberDisplay('#total-number');
-
-        numberRecords
-        .formatNumber(d3.format("d"))
-        .valueAccessor(function (d) {return d;})
-        .group(total);
-
-        numberRecords.render();
-
-};
+  numberRecords.render();
+}
 
 //this for statistic insights from data
 function groupArrayAdd(keyfn) {
-      var bisect = d3.bisector(keyfn);
-      return function(elements, item) {
-          var pos = bisect.right(elements, keyfn(item));
-          elements.splice(pos, 0, item);
-          return elements;
-      };
-  }
-  function groupArrayRemove(keyfn) {
-      var bisect = d3.bisector(keyfn);
-      return function(elements, item) {
-          var pos = bisect.left(elements, keyfn(item));
-          if(keyfn(elements[pos])===keyfn(item))
-              elements.splice(pos, 1);
-          return elements;
-      };
-  }
-  function groupArrayInit() {
-      return [];
-  }
-
+  var bisect = d3.bisector(keyfn);
+  return function(elements, item) {
+    var pos = bisect.right(elements, keyfn(item));
+    elements.splice(pos, 0, item);
+    return elements;
+  };
+}
+function groupArrayRemove(keyfn) {
+  var bisect = d3.bisector(keyfn);
+  return function(elements, item) {
+    var pos = bisect.left(elements, keyfn(item));
+    if (keyfn(elements[pos]) === keyfn(item)) elements.splice(pos, 1);
+    return elements;
+  };
+}
+function groupArrayInit() {
+  return [];
+}
 
 //end
 
 function makeComparaison(records) {
+  var chart = dc.seriesChart("#compareChart");
 
-    var chart = dc.seriesChart("#compareChart");
+  var ndx = crossfilter(records.result);
+  var crimeDim = ndx.dimension(function(d) {
+    return [d["Primary_Type"], new Date(d["Date"])];
+  });
 
-    var ndx = crossfilter(records.result);
-    var crimeDim = ndx.dimension(function (d) {
-        return [d['Primary_Type'], new Date(d['Date'])];
-    });
+  var crimeOnlyDim = ndx.dimension(function(d) {
+    return d["Primary_Type"];
+  });
 
-    var crimeOnlyDim = ndx.dimension(function(d){
-        return d['Primary_Type'];
-    });
+  var crimeOnlyGroup = crimeOnlyDim.group();
 
-    var crimeOnlyGroup = crimeOnlyDim.group();
+  var reducer = reductio()
+    .max(function(d) {
+      return d["crimes_Count"];
+    })
+    .min(true)
+    .median(true)
+    .count(true)
+    .sum(function(d) {
+      return d["crimes_Count"];
+    })
+    .avg(true);
 
-    var reducer = reductio()
-        .max(function(d){return d['crimes_Count'];})
-        .min(true)
-        .median(true)
-        .count(true)
-        .sum(function (d) {return d['crimes_Count'];})
-        .avg(true);
+  reducer(crimeOnlyGroup);
 
-    reducer(crimeOnlyGroup);
+  var stats = crimeOnlyGroup.top(Infinity);
 
-    var stats = crimeOnlyGroup.top(Infinity);
+  document.getElementById("table-body").innerHTML = makeTable(stats);
+  document.getElementById("table-body-corr").innerHTML = makeTableCorr(
+    records.corr
+  );
 
-    document.getElementById('table-body').innerHTML= makeTable(stats);
-    document.getElementById('table-body-corr').innerHTML= makeTableCorr(records.corr);
+  var crimeGroupe = crimeDim.group().reduceSum(function(d) {
+    return d["crimes_Count"];
+  });
 
-    var crimeGroupe = crimeDim.group().reduceSum(function (d) {
-        return d['crimes_Count'];
-    });
+  var dateDim = ndx.dimension(function(d) {
+    return d["Date"];
+  });
+  var dateGroup = dateDim.group();
 
-    var dateDim = ndx.dimension(function (d) { return d["Date"];});
-    var dateGroup = dateDim.group();
+  var minDate = dateDim.bottom(1)[0]["Date"];
+  var maxDate = dateDim.top(1)[0]["Date"];
+  document.getElementById("date-range").innerHTML = minDate + " - " + maxDate;
 
-    var minDate = dateDim.bottom(1)[0]["Date"];
-    var maxDate = dateDim.top(1)[0]["Date"];
-    document.getElementById('date-range').innerHTML = minDate +' - '+ maxDate;
+  chart
+    .chart(function(c) {
+      return dc.lineChart(c).interpolate("cardinal");
+    })
+    .x(d3.scaleTime().domain([new Date(minDate), new Date(maxDate)]))
+    .dimension(crimeDim)
+    .group(crimeGroupe)
+    .seriesAccessor(function(d) {
+      return d.key[0];
+    })
+    .keyAccessor(function(d) {
+      return d.key[1];
+    })
+    .brushOn(false)
+    .valueAccessor(function(d) {
+      return d.value;
+    })
+    //legend(dc.legend().x(350).y(350).itemHeight(13).gap(5).horizontal(1).legendWidth(140).itemWidth(70));
+    .legend(
+      dc
+        .legend()
+        .x(window.innerWidth - 250)
+        .y(0)
+        .itemHeight(10)
+        .gap(5)
+    );
 
-     chart
-         .chart(function (c) { return dc.lineChart(c).interpolate('cardinal') })
-         .x(d3.scaleTime().domain([new Date(minDate), new Date(maxDate)]))
-         .dimension(crimeDim)
-         .group(crimeGroupe)
-         .seriesAccessor(function (d) { return d.key[0]; })
-         .keyAccessor(function (d) { return d.key[1]; })
-         .brushOn(false)
-         .valueAccessor(function (d) { return d.value; })
-         //legend(dc.legend().x(350).y(350).itemHeight(13).gap(5).horizontal(1).legendWidth(140).itemWidth(70));
-         .legend(dc.legend().x(window.innerWidth-250).y(0).itemHeight(10).gap(5));
-
-    chart.render();
+  chart.render();
 }
 
 function makeTable(objects) {
-    var html = '';
-    for(var i=0;i<objects.length;i++){
-        html+= "<tr><th>"+objects[i].key+"</th><th>"+objects[i].value.max+"</th><th>"
-            +objects[i].value.min+"</th><th>"+objects[i].value.median+"</th><th>"
-            +objects[i].value.sum+"</th><th>"+objects[i].value.avg.toFixed(2)+"</th></tr>";
-    }
-    return html;
+  var html = "";
+  for (var i = 0; i < objects.length; i++) {
+    html +=
+      "<tr><th>" +
+      objects[i].key +
+      "</th><th>" +
+      objects[i].value.max +
+      "</th><th>" +
+      objects[i].value.min +
+      "</th><th>" +
+      objects[i].value.median +
+      "</th><th>" +
+      objects[i].value.sum +
+      "</th><th>" +
+      objects[i].value.avg.toFixed(2) +
+      "</th></tr>";
+  }
+  return html;
 }
 
 function makeTableCorr(objects) {
-    var html = '';
+  var html = "";
 
-    for(var key in objects){
-            html+="<tr><th>"+ key+"</th><th>"+ objects[key].toFixed(4)+"</th></tr>";
-    }
-    return html;
+  for (var key in objects) {
+    html +=
+      "<tr><th>" + key + "</th><th>" + objects[key].toFixed(4) + "</th></tr>";
+  }
+  return html;
 }
 
-function makeClusteringResultsTable(records){
-
-    //var html = "<tr class="text-white"><th scope="col">"+title+"</th></tr>"
-    var html = '';
-    var k = 1;
-    for (var key in records){
-        html +="<tr><th>"+ k +"</th><th>";
-        x = records[key]
-        for (i=0; i<x.length; i++){
-            html+= x[i]+"; ";
-        }
-        html+= "</th>";
-        k++;
+function makeClusteringResultsTable(records) {
+  //var html = "<tr class="text-white"><th scope="col">"+title+"</th></tr>"
+  var html = "";
+  var k = 1;
+  for (var key in records) {
+    html += "<tr><th>" + k + "</th><th>";
+    x = records[key];
+    for (i = 0; i < x.length; i++) {
+      html += x[i] + "; ";
     }
+    html += "</th>";
+    k++;
+  }
 
-    return html;
-
+  return html;
 }
 
-
-      // this function will generate a png file of the element provided by ID and save it as as output_name.png
-        function toPNG(id,output_name ) {
-            var options = {};
-            options.backgroundColor = '#ffffff';
-            options.selectorRemap = function(s) { return s.replace(/\.dc-chart/g, ''); };
-            var chart = document.getElementById(id).getElementsByTagName('svg')[0];
-            saveSvgAsPng(chart, output_name+'.png', options)
-
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
+// this function will generate a png file of the element provided by ID and save it as as output_name.png
+function toPNG(id, output_name) {
+  var options = {};
+  options.backgroundColor = "#ffffff";
+  options.selectorRemap = function(s) {
+    return s.replace(/\.dc-chart/g, "");
+  };
+  var chart = document.getElementById(id).getElementsByTagName("svg")[0];
+  saveSvgAsPng(chart, output_name + ".png", options);
+}
