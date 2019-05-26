@@ -11,22 +11,22 @@ import datetime
 from visual.models import Crime
 from django.db.models import Count
 
+
+listofCrimesGlobal = ['Agression', 'Violation de l ordre publique', 'Vol', 'Infractions relative aux armes',
+                      'Vol de vehicule a  moteur', 'Autre infraction', 'Pratique deceptive', 'Dommage criminel', 'Transgression penale', 'Cambriolage',
+                      'Harcelement', 'Agression sexuelle', 'Narcotique', 'Infraction sexuelle', 'Autre', 'Infraction d enfants', 'Kidnapping', 'Jeu d argent', 'Incendie volontaire',
+                      'Violation des liee a l alcool', 'Obscenite', 'Non penal', 'indecence publique', 'Trafic humain', 'Violation de licence de trasport', 'Autre violation narcotique']
+
+
 # Create your views here.
 
 
 def predictCrimes(request):
-    listOfCrimes = ['THEFT', 'BATTERY', 'CRIMINAL DAMAGE', 'ASSAULT', 'OTHER OFFENSE', 'NARCOTICS', 'DECEPTIVE PRACTICE',
-                    'MOTOR VEHICLE THEFT', 'ROBBERY', 'BURGLARY', 'CRIMINAL TRESPASS', 'WEAPONS VIOLATION',
-                    'OFFENSE INVOLVING CHILDREN', 'PUBLIC PEACE VIOLATION', 'CRIME SEXUAL ASSAULT', 'HOMOCIDE',
-                    'PROSTITUION', 'SEX OFFENSE', 'INTERFEREENCE WITH PUBLIC OFFICER', 'KIDNAPPING', 'ARSON', 'GAMBLING',
-                    'INTIMIDATING', 'LIQUOR LAW VIOLATION', 'STALKING']
-    resolu = ['Resolu', 'Non resolu']
-    listOfChapters = ['Actes menant ou destinés à causer une homicide', 'fdfd']
 
     type_Place = ['Appartement', 'Route', 'Etablissement', 'Local']
     motif = ['Revenge']
     context = {
-        'crimes': listOfCrimes
+        'crimes': listofCrimesGlobal
     }
     return render(request, 'predict/forecast.html', context)
 
@@ -36,6 +36,17 @@ def makeForecast(request):
     types = request.POST.getlist('types[]')
     startDate = request.POST['startDate']
     endDate = request.POST['endDate']
+    # Fetching post request variables
+    # growth = request.POST['endDate'] = request.POST['']
+    # holidays = request.POST.getlist('holidays[]')
+    # fourier_order_weekly = request.POST['fourier_order']
+    # fourier_order_yearly = request.POST['']
+    # seasonality_mode = request.POST['']
+    # seasonality_prior_scale = request.POST['']
+    # annual_seasonality = request.POST['']
+    # weekly_seasonality = request.POST['']
+    # daily_seasonality = request.POST['']
+
     # arrest = request.POST['arrest']
     # rawData = Crime.objects.filter(Date__range=[startDate, endDate], Arrest__in=arrest, Primary_Type__in=types).\
     #     values('Date', 'Primary_Type').\
@@ -48,7 +59,6 @@ def makeForecast(request):
     crimes = data.sort_values(by='ds')
     crimes.reset_index(inplace=True)
     crimes['ds'] = crimes.ds.astype(str)
-    
     m = Prophet()
     m.fit(crimes)
     future = m.make_future_dataframe(periods=10)
@@ -56,9 +66,6 @@ def makeForecast(request):
     forecast = m.predict(future)
     forecast['ds'] = forecast.ds.astype(str)
     # return json content for our crimes data and forecast
-    # print(forecast)
-    # print('i am here')
-    # result = json.dumps(result)
     crimes = crimes.to_dict(orient='records')
     forecast = forecast.to_dict(orient='records')
     # result = crimes.to_json(orient='records')
@@ -66,41 +73,4 @@ def makeForecast(request):
 
 
 def makeOtherForecasts(request):
-    types = request.POST.getlist('types[]')
-    startDate = request.POST['startDate']
-    endDate = request.POST['endDate']
-    # arrest = request.POST['arrest']
-    # rawData = Crime.objects.filter(Date__range=[startDate, endDate], Arrest__in=arrest, Primary_Type__in=types).\
-    #     values('Date', 'Primary_Type').\
-    #     annotate(crimes_Count=Count('id')).order_by('Date')
-    df = pd.DataFrame(
-        list(Crime.objects.filter(Date__range=[startDate, endDate], Primary_Type__in=types).values()))
-    # df = pd.DataFrame(list(Crime.objects.all().values()))
-    data = pd.DataFrame(df['Date'].value_counts(sort=False).reset_index())
-    data.columns = ['ds', 'y']
-    crimes = data.sort_values(by='ds')
-    crimes.reset_index(inplace=True)
-    crimes['ds'] = crimes.ds.astype(str)
-    # crimes['ds'] = crimes['ds'].dt.strftime('%Y-%m-%d')
-    # for i in rawData.values():
-    #     i['Date'] = i['Date'].strftime('%m/%d/%Y')
-    #     result.append(i)
-
-    # create a Prophet model
-    m = Prophet()
-    # # fit the dataframe to the Prophet model
-    m.fit(crimes)
-    # create a new period to forecast
-    future = m.make_future_dataframe(periods=10)
-    # making the forecast
-    forecast = m.predict(future)
-    forecast['ds'] = forecast.ds.astype(str)
-    # return json content for our crimes data and forecast
-    # print(forecast)
-    # print('i am here')
-    # result = json.dumps(result)
-    crimes = crimes.to_dict(orient='records')
-    forecast = forecast.to_dict(orient='records')
-
-    # result = crimes.to_json(orient='records')
-    return JsonResponse({'crimes': crimes, 'forecast': forecast})
+    return JsonResponse({'crimes': 1})

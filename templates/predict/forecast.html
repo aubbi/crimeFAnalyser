@@ -2,8 +2,9 @@
 
 {% block content %}
 
-<!-- Including local-used css -->
- 
+
+
+
 <body class="keen-dashboard">
 <div class="jumbotron">
   <h4 class="display-4">Prévision de la criminalité</h4>
@@ -15,167 +16,235 @@
   <p>4 => Cliquez sur: Prévoir la criminalité</p>
   <p>5 => Analyser et sauvegarder les résultats</p>
 </div>
-<br>
+ 
 
-
-<div class="">
-  <h4 class="display-8">1. Filtrage de données</h4>
-<div class="row">
-<br>
-<div class="row">
-  <div class="col-md-12">
-    <br><br>
-      {% csrf_token %}
-      <div class="input-group mb-3">
-        <div class="input-group-prepend">
-          <label class="input-group-text success" for="inputGroupSelect01">Places</label>
-        </div>
-        <select class="custom-select" id="inputGroupSelect01">
-          {% for crime in crimes  %}
-          <option value="{{ crime }}">{{ crime }}</option>
-          {% endfor %}
-        </select>
+<div class="card-body">
+   <div id="accordion5" class="according accordion-s2 gradiant-bg">
+    <div class="card">
+      <div class="card-header">
+        <a class="card-link collapsed" data-toggle="collapse" href="#accordion51" aria-expanded="false">Filtrage de données #1</a>
       </div>
-      {% csrf_token %}
-      <div class="input-group mb-3">
-        <div class="input-group-prepend">
-          <label class="input-group-text success" for="inputGroupSelect01">Type crime</label>
-        </div>
-        <select class="custom-select" id="inputGroupSelect01">
-          {% for crime in crimes  %}
-          <option value="{{ crime }}">{{ crime }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="input-group mb-3">
-        <div class="input-group-prepend">
-          <label class="input-group-text success" for="inputGroupSelect01">Type lieu</label>
-        </div>
-        <select class="custom-select" id="inputGroupSelect01">
-          {% for crime in crimes  %}
-          <option value="{{ crime }}">{{ crime }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="form-row">
-        <div class="col-md-4 mb-3">
-          <div class="form-group">
-            <label for="start_date" class="col-form-label">Start date</label>
-            <input class="form-control" name="startDate" type="date" value="2016-01-05" id="start_date">
-          </div>
-        </div>
-        <div class="col-md-4 mb-3">
-          <div class="form-group">
-            <label for="end_date" class="col-form-label">End date</label>
-            <input class="form-control" name="endDate" type="date" value="2016-03-05" id="end_date">
-          </div>
-        </div>
-      </div>
-      <button type="submit" onclick="document.getElementById('choix').style.display = 'block' ;" class="btn btn-primary mt-4 pr-4 pl-4">Submit</button>
-    </div>
-  </div>
-</div>
-</div>
-
-
-<div class="jumbotron" id="choix" style="display: none;">
-  <h4 class="display-8">2. Choisissez la méthode de prévision que vous voulez</h4>
-  <div class="row">
-   <br>
-    <div>
-      <form>
-      <select>
-        <option value="Arima" onclick="document.getElementById('prophet').style.display = 'block' ;">prophet</option>
-        <option value="green" onclick="document.getElementById('arima').style.display = 'block' ;">arima</option>
-        <option value="blue" onclick="document.getElementById('ets').style.display = 'block' ;">ets</option>
-      </select>
-      </form>
-     </div>
-  </div>
-</div>
-
-<div class="" id="prophet" style="display: block;">
-  <h4 class="display-8">3. Paramétrage du modèle de prévision: Prophet</h4>
-  <div class="row">
-
-    <div class="col-lg-12 mt-5">
-      <div class="card">
+      <div id="accordion51" class="collapse" data-parent="#accordion5" style="">
         <div class="card-body">
-          <h4 class="header-title">Accordion 1</h4>
-          <div id="accordion3" class="according accordion-s3">
-            <div class="card">
-              <div class="card-header">
-                <a class="card-link collapsed" data-toggle="collapse" href="#accordion31" aria-expanded="false">Paramètres avancés</a>
-              </div>
-              <div id="accordion31" class="collapse" data-parent="#accordion3" style="">
-                <div class="card-body">
-                 Here goes the parameters of the system
-                    <div class="container">
-                      <label>Entrer la liste des dates des vacances</label>
-                      <input type="text" class="form-control date" placeholder="Pick the multiple dates">
+          <!--Here goes the 1st step code-->
+          <div class="">
+            <h4 class="display-8">1. Filtrage de données</h4>
+            <div class="row">
+              <br>
+              <div class="row">
+                <div class="col-md-12">
+                  <form action="{% url 'makeForecast'  %}" method="post" id="forecast_form">
+                    {% csrf_token %}
+                    <b class="text-muted mb-3 mt-4 d-block">Types de crimes</b>
+                    {% for crime in crimes  %}
+                    <div class="custom-control custom-checkbox custom-control-inline">
+                      <input type="checkbox" class="custom-control-input crimeBox" id="{{ crime }}" name="types[]"
+                        value="{{ crime }}">
+                      <label class="custom-control-label" for="{{ crime }}">{{ crime }}</label>
                     </div>
-                    <div class="col-lg-4">
-                      <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                          <label class="input-group-text success" for="inputGroupSelect01">Seasonalité hebdomadaire</label>
+                    {% endfor %}
+                    <div class="form-row">
+                      <div class="col-md-4 mb-3">
+                        <div class="form-group">
+                          <label for="start_date" class="col-form-label">Date début</label>
+                          <input class="form-control" name="startDate" type="date" value="2016-01-05" id="start_date">
                         </div>
-                        <select class="custom-select" id="inputGroupSelect01">
-                          {% for crime in crimes  %}
-                          <option value="{{ crime }}">{{ crime }}</option>
-                          {% endfor %}
-                        </select>
                       </div>
-
-                </div>
+                      <div class="col-md-4 mb-3">
+                        <div class="form-group">
+                          <label for="end_date" class="col-form-label">Date fin</label>
+                          <input class="form-control" name="endDate" type="date" value="2016-03-05" id="end_date">
+                        </div>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label for="end_date" class="col-form-label">Arrestation</label>
+                        <div class="form-group">
+                          <div class="custom-control custom-checkbox custom-control-inline">
+                            <input type="checkbox" class="custom-control-input arrest" id="true" name="arrest[]" value="1">
+                            <label class="custom-control-label" for="true">True</label>
+                          </div>
+                          <div class="custom-control custom-checkbox custom-control-inline">
+                            <input type="checkbox" class="custom-control-input arrest" id="false" name="arrest[]" value="0">
+                            <label class="custom-control-label" for="false">False</label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">Calculer</button>
+                  </form>
+                  </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    
-        <button type="submit" class="btn btn-primary mt-4 pr-4 pl-4">Submit</button>
+    <div class="card">
+      <div class="card-header">
+        <a class="collapsed card-link" data-toggle="collapse" href="#accordion52">Méthode de prévision #2</a>
       </div>
-  <div>
+      <div id="accordion52" class="collapse" data-parent="#accordion5">
+        <div class="card-body">
 
+          <!--Here goes the 1st step code-->
 
+            <div  id="choix" style="display: block;">
+              <h4 class="display-8">2. Choisissez la méthode de prévision que vous voulez</h4>
+              <div-- class="row">
+                <br>
+                <div>
+                  <form>
+                    <select>
+                      <option value="Arima" onClick="document.getElementById('prophet').style.display = 'block' ;">prophet</option>
+                      <option value="green" onClick="document.getElementById('arima').style.display = 'block' ;">arima</option>
+                      <option value="blue" onClick="document.getElementById('ets').style.display = 'block' ;">ets</option>
+                    </select>
+                  </form>
+                   <!--button type="button" class="btn btn-primary btn-flat btn-lg mt-3" data-toggle="modal"
+                    data-target="#exampleModalCenter">Launch demo modal</button>
+                </div>
+                <div class="modal fade show" id="exampleModalCenter" style="display: block; padding-right: 16px;">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+                      </div>
+                      <div class="modal-body">
+                        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eius voluptates explicabo natus nobis, aperiam
+                          placeat aliquid nisi ut exercitationem dolor quisquam nam tempora voluptatem. Unde dignissimos est aliquid
+                          quidem porro dolorum ipsam suscipit animi quas, debitis ea, sunt quo distinctio doloribus eveniet dolores
+                          tempore delectus voluptatum! Possimus earum asperiores animi.</p>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                      </div>
+                    </div>
+                  </div>
+                </div-->
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <a class="collapsed card-link" data-toggle="collapse" href="#accordion53">Paramétrage du modèle de prévision #3</a>
+      </div>
+      <div id="accordion53" class="collapse" data-parent="#accordion5">
+        <div class="card-body">
+          <!--Here goes the 1st step code-->
+          <div id="prophet" style="display: none;">
+            <h4 class="display-8">Facebook Prophet</h4>
+            <div class="row">
+              <p>fdf</p>
+            </div>
+          </div>
+          <div id="arima" id="arima" style="display: none;">
+            <h4 class="display-8">ARIMA</h4>
+            <div class="row">
+              <p></p>
+              <div>
+                Arima
+              </div>
+            </div>
+          </div>
+          <div id="lstm" id="lstm" style="display: none;">
+            <h4 class="display-8">LSTM</h4>
+            <div class="row">
+              <p></p>
+              <div>
+                lstm
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <a class="collapsed card-link" data-toggle="collapse" href="#accordion54">Résultats #3</a>
+      </div>
+      <div id="accordion54" class="collapse" data-parent="#accordion5">
+        <div class="card-body">
+           <!-- Plotly.js -->
+            <div class="row">
+              <div style="height: 600px; width: 100%" id="firstForecast"></div>
+            </div>
+            
+            <div class="row">
+               <div style="height: 600px; width: 100%" id="myDiv"></div>
+            </div>
+           
+            <div class="row">
+                <div style="height: 600px; width: 100%" id="chartdiv"></div>
+            </div>
+        </div>
+      </div>
+      <div class="row">
+        <div style="height: 600px; width: 100%" id="myDiv"></div>
+      </div>
+      </div>
     </div>
   </div>
+ 
 </div>
 
-<div class="jumbotron"  id="arima" id="arima" style="display: none;">
-  <h4 class="display-8">3. Auto.ARIMA</h4>
-  <div class="row">
-    <p></p>
-    <div>
-    </div>
-  </div>
-</div>
 
-<div class="jumbotron" id = "ets" id="ets" style="display: none;">
-  <h4 class="display-8">3. ETS</h4>
-  <div class="row">
-    <p></p>
-    <div>
-    </div>
-  </div>
-</div>
-
-<div class="jumbotron" id="viz">
-  <!-- Plotly.js -->
-  <div id="myDiv" style="height: 600px; width: 100%"></div>
-  </form>
-  <div class="row">
-    <div style="height: 600px; width: 100%" id="firstForecast"></div>
-  </div>
-  <div class="row">
-    <div style="height: 600px; width: 100%" id="chartdiv"></div>
-  </div>
-</div>
 
 {% endblock %}
 
 {% block scripts %}
+
+<script type="text/javascript">
+
+  var token = '{{csrf_token}}';
+
+  $(document).on('submit', '#forecast_form', function (e) {
+    alert('heeeeey');
+    e.preventDefault();
+    var crimesSelected = [];
+    $(".crimeBox:checked").each(function () {
+      crimesSelected.push(this.value)
+    });
+    var arrest = [];
+    $(".arrest:checked").each(function () {
+      arrest.push(this.value)
+    });
+
+    $.ajax({
+      headers: { "X-CSRFToken": token },
+      type: 'POST',
+      url: '../makeForecast',
+      data: {
+        types: crimesSelected,
+        startDate: $("#start_date").val(),
+        endDate: $("#end_date").val(),
+      },
+      success: function (result) {
+        alert('success');
+        forecastChart(result);
+        console.log("i am here");
+        forecastTrend(result);
+        forecastAll(result);
+      },
+      error: function (msg) {
+        alert('no response');
+      }
+    });
+  });
+
+
+
+
+
+
+
+
+</script>
 
 <script src="https://www.amcharts.com/lib/4/core.js"></script>
 <script src="https://www.amcharts.com/lib/4/charts.js"></script>
@@ -186,87 +255,7 @@
 <script src="https://www.amcharts.com/lib/3/lang/fr.js"></script>
 <script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
-
- <script type="text/javascript">
-
-  $(document).ready(function () {
-   // For showing/hiding other methods based on the dropdown selection
-    $("select").change(function () {
-      $(this).find("option:selected").each(function () {
-        var optionValue = $(this).attr("value");
-        if (optionValue) {
-          $(".box").not("." + optionValue).hide();
-          $("." + optionValue).show();
-        } else {
-          $(".box").hide();
-        }
-      });
-    }).change();
-
-    $('.js-example-basic-multiple').select2();
-
-    // For multiple datepicker
-    $('.date').datepicker({
-      multidate: true,
-      format: 'dd-mm-yyyy'
-    });
-
-    $('.js-example-basic-multiple').select2({
-      placeholder: "Choisir un chapitre";
-    });
-
-    var token = '{{csrf_token}}';
-    $(document).on('submit', '#forecast_form', function (e) {
-
-      e.preventDefault();
-      var crimesSelected = [];
-      $(".crimeBox:checked").each(function () {
-        crimesSelected.push(this.value)
-      });
-      var arrest = [];
-      $(".arrest:checked").each(function () {
-        arrest.push(this.value)
-      });
-      $.ajax({
-        headers: { "X-CSRFToken": token },
-        type: 'POST',
-        url: '../makeForecast',
-        data: {
-          types: crimesSelected,
-          startDate: $("#start_date").val(),
-          endDate: $("#end_date").val(),
-         },
-        dataType: 'json',
-
-        success: function (result) {
-          alert('success');
-          forecastChart(result);
-          forecastTrend(result);
-          forecastAll(result);
-        },
-        error: function (msg) {
-          alert('no response');
-        }
-      });
-    });
-
-
-
-    $(function () {
-      $('#colorselector').change(function () {
-        $('.colors').hide();
-        $('#' + $(this).val()).show();
-      });
-    });
-
-
-
-  });
-  </script>
   {% endblock %}
-  </body>
+</body>
 </html>
 

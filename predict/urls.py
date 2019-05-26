@@ -6,8 +6,5 @@ from . import views
 urlpatterns = [
     path('make/', views.predictCrimes, name='showForecast'),
     url(r'^makeForecast', views.makeForecast, name="makeForecast"),
-    path('instructions/', views.makeForecast, name='instructions'),
-    url(r'^makeOtherForecast', views.makeOtherForecasts, name="makeOtherForecasts"),
-    path('predict_period/', views.predictCrimes, name='predict'),
-    path('predict_region/', views.predictCrimes, name='predict'),
+    #path('instructions/', views.showInstructions, name='instructions'),
 ]

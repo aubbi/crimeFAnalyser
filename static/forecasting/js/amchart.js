@@ -21,12 +21,11 @@ function forecastChart(records) {
 
   var data = [];
 
-  for (i = 0; i < Object.size(records.forecast); i++) {
+  for (i = 0; i < Object.size(records.crimes); i++) {
     price = getSafe(() => records.crimes[i].y, 0);
     quantity = records.forecast[i].yhat;
     data.push({
       date: new Date(records.forecast[i].ds),
-
       price: price,
       quantity: quantity
     });
@@ -162,8 +161,6 @@ function forecastTrend(records) {
 
   chart.addListener("dataUpdated", zoomChart);
   zoomChart();
-
-  // generate some random data, quite different range
   function generateChartData(records) {
     var chartData = [];
     var firstDate = new Date();
@@ -173,7 +170,7 @@ function forecastTrend(records) {
     var hits = 2900;
     var views = 8700;
 
-    for (i = 0; i < Object.size(records.forecast); i++) {
+    for (i = 0; i < Object.size(records.crimes); i++) {
       visits = getSafe(() => records.crimes[i].y, 0);
       hits = records.forecast[i].yhat;
       views = records.forecast[i].trend;
