@@ -36,7 +36,11 @@ def makeForecast(request):
     types = request.POST.getlist('types[]')
     startDate = request.POST['startDate']
     endDate = request.POST['endDate']
+
+    period = request.POST['period']
+
     # Fetching post request variables
+
     # growth = request.POST['endDate'] = request.POST['']
     # holidays = request.POST.getlist('holidays[]')
     # fourier_order_weekly = request.POST['fourier_order']
@@ -61,16 +65,36 @@ def makeForecast(request):
     crimes['ds'] = crimes.ds.astype(str)
     m = Prophet()
     m.fit(crimes)
-    future = m.make_future_dataframe(periods=10)
+    future = m.make_future_dataframe(periods=int(period))
     # making the forecast
     forecast = m.predict(future)
     forecast['ds'] = forecast.ds.astype(str)
     # return json content for our crimes data and forecast
     crimes = crimes.to_dict(orient='records')
     forecast = forecast.to_dict(orient='records')
-    # result = crimes.to_json(orient='records')
+
+    days = (pd.date_range(start='2017-01-01', periods=365) + pd.Timedelta(days=0))
+    df_y = m.seasonality_plot_df(days)
+    seas = m.predict_seasonal_components(df_y)
+
+    fig,ax = plt.subplots(2, 1, figsize=(8,6))
+    ax[0].plot(forecast['ds'].dt.to_pydatetime(), forecast['trend'])
+    ax[0].grid(alpha=0.5)
+    ax[0].set_xlabel('ds')
+    ax[1].set_ylabel('trend')
+    ax[1].plot(df_y['ds'].dt.to_pydatetime(), seas['yearly'], ls='-', c='#0072B2')
+    ax[1].set_xlabel('Day of year')
+    ax[1].set_ylabel('yearly')
+    ax[1].grid(alpha=0.5)    # result = crimes.to_json(orient='records')
+
+    
     return JsonResponse({'crimes': crimes, 'forecast': forecast})
 
 
 def makeOtherForecasts(request):
     return JsonResponse({'crimes': 1})
+
+
+def showInstructions(request):
+
+    return render(request, 'predict/instructions.html')

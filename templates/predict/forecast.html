@@ -36,7 +36,7 @@
                     {% csrf_token %}
                     <b class="text-muted mb-3 mt-4 d-block">Types de crimes</b>
                     {% for crime in crimes  %}
-                    <div class="custom-control custom-checkbox custom-control-inline">
+                    <div class="custom-control custom-checkbox custom-control-inline" style="margin: 10px;">
                       <input type="checkbox" class="custom-control-input crimeBox" id="{{ crime }}" name="types[]"
                         value="{{ crime }}">
                       <label class="custom-control-label" for="{{ crime }}">{{ crime }}</label>
@@ -66,6 +66,14 @@
                             <input type="checkbox" class="custom-control-input arrest" id="false" name="arrest[]" value="0">
                             <label class="custom-control-label" for="false">False</label>
                           </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-row">
+                      <div class="col-md-4 mb-3">
+                        <div class="form-group">
+                          <label for="period" class="col-form-label">Période future (en jours) </label>
+                          <input class="form-control" name="period" value="30" id="period" type="number">
                         </div>
                       </div>
                     </div>
@@ -234,40 +242,46 @@
       <div id="accordion54" class="collapse" data-parent="#accordion5">
         <div class="card-body">
            <!-- Plotly.js -->
-            <div class="row">
-              <div style="height: 600px; width: 100%" id="firstForecast"></div>
-            </div>
-            
-            <div class="row">
-               <div style="height: 600px; width: 100%" id="myDiv"></div>
-            </div>
-           
+            <h4>1. Analyse de la criminalité dans le temps</h4>
             <div class="row">
                 <div style="height: 600px; width: 100%" id="chartdiv"></div>
             </div>
+            <br><br>
+            <h4>2. Prévision de la criminalité</h4>
+             <div class="row">
+               <div style="height: 600px; width: 100%" id="myDiv"></div>
+            </div>
+            <h4>3. Exactitude du modèle</h4>
+            <div class="row">
+               <div style="height: 600px; width: 100%" id="myDiv"></div>
+            </div>
         </div>
-      </div>
-      <div class="row">
-        <div style="height: 600px; width: 100%" id="myDiv"></div>
       </div>
       </div>
     </div>
   </div>
- 
+
 </div>
-
-
 
 {% endblock %}
 
 {% block scripts %}
+<script src="https://www.amcharts.com/lib/4/core.js"></script>
+<script src="https://www.amcharts.com/lib/4/charts.js"></script>
+<script src="https://www.amcharts.com/lib/4/themes/material.js"></script>
+<script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
+<script src="https://www.amcharts.com/lib/3/serial.js"></script>
+<script src="https://www.amcharts.com/lib/3/themes/light.js"></script>
+<script src="https://www.amcharts.com/lib/3/lang/fr.js"></script>
+<script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js"></script>
+
 
 <script type="text/javascript">
 
   var token = '{{csrf_token}}';
 
   $(document).on('submit', '#forecast_form', function (e) {
-    alert('heeeeey');
+    alert('Veuillez attendez!');
     e.preventDefault();
     var crimesSelected = [];
     $(".crimeBox:checked").each(function () {
@@ -283,14 +297,15 @@
       type: 'POST',
       url: '../makeForecast',
       data: {
+        period: $("#period").val(),
         types: crimesSelected,
         startDate: $("#start_date").val(),
         endDate: $("#end_date").val(),
       },
       success: function (result) {
         alert('success');
-        forecastChart(result);
-        console.log("i am here");
+        // console.log(result)
+        // console.log("i am here");
         forecastTrend(result);
         forecastAll(result);
       },
@@ -306,27 +321,10 @@
       multidate: true,
       format: 'dd-mm-yyyy'
     });
-
-
-
-
-
-
-
-
-
 </script>
 
-<script src="https://www.amcharts.com/lib/4/core.js"></script>
-<script src="https://www.amcharts.com/lib/4/charts.js"></script>
-<script src="https://www.amcharts.com/lib/4/themes/material.js"></script>
-<script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
-<script src="https://www.amcharts.com/lib/3/serial.js"></script>
-<script src="https://www.amcharts.com/lib/3/themes/light.js"></script>
-<script src="https://www.amcharts.com/lib/3/lang/fr.js"></script>
-<script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js"></script>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  {% endblock %}
+  
+{% endblock %}
 </body>
 </html>
 
