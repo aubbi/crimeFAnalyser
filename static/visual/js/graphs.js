@@ -653,44 +653,92 @@ function allDataGraphs(records) {
 };
 
 function makeSomething(records) {
-    var parseTime = d3.timeParse("%m/%d/%Y");
+
+    var parseTime = d3.timeParse("%Y-%m-%d");
 
     records.forEach(function (d) {
         d["Date"] = parseTime(d["Date"]);
         d.month = d3.timeMonth(d["Date"]);
+        d["DistrictStr"] = d["District"].toString();
     });
 
 
     var moveChart = dc.lineChart('#monthly-move-chart');//line chart for showing details
+    var volumeChart = dc.barChart('#monthly-volume-chart');//bar chart to show resumed infos
+    var districtsChart = dc.barChart("#district-chart");
+    var crimeTypeChart = dc.barChart("#type-chart");
 
     var ndx = crossfilter(records);
 
+
     var dateDim = ndx.dimension(function (d) {return d["Date"];})
+    var moveMonths = ndx.dimension(function (d) {return d.month;});
+    var crimeTypeDim = ndx.dimension(function (d) { return d["Primary_Type"];});
+    var districtDim = ndx.dimension(function (d) {return d["DistrictStr"]});
     var minDate = dateDim.bottom(1)[0]["Date"];
     var maxDate = dateDim.top(1)[0]["Date"];
-    console.log(minDate, maxDate);
-    var dateCount = dateDim.group().reduceSum(function (d) {return d["crimes_Count"]})
 
-    console.log(dateCount.top(1));
-    var countDim = ndx.dimension(function (d) {
-        return d["crimes_Count"];
-    })
+    var dateCount = dateDim.group().reduceSum(function (d) {return +d["crimes_Count"]});
+    var countPerMonth = moveMonths.group().reduceSum(function(d){return +d["crimes_Count"]});
+    var countPerType = crimeTypeDim.group().reduceSum(function(d){return +d["crimes_Count"]});
+    var countPerRegion = districtDim.group().reduceSum(function () {return +["crimes_Count"]});
+
 
     moveChart /* dc.lineChart('#monthly-move-chart', 'chartGroup') */
-        .renderArea(true)
         .width(990)
         .height(200)
         .transitionDuration(1000)
         .margins({top: 30, right: 50, bottom: 25, left: 40})
         .dimension(dateDim)
-        .mouseZoomable(true)
-        .x(d3.scaleTime().domain([new Date(2012, 1, 1), new Date(2017, 1, 1)]))
+        .group(dateCount)
+        .x(d3.scaleTime().domain([minDate, maxDate]))
         .round(d3.timeMonth.round)
         .xUnits(d3.timeMonths)
         .elasticY(true)
         .renderHorizontalGridLines(true)
-        .group(dateCount)
+        .rangeChart(volumeChart)
 
+    volumeChart
+        .width(990) /* dc.barChart('#monthly-volume-chart', 'chartGroup'); */
+        .height(100)
+        .margins({top: 0, right: 50, bottom: 20, left: 40})
+        .dimension(moveMonths)
+        .group(countPerMonth)
+        .centerBar(true)
+        .gap(1)
+        .x(d3.scaleTime().domain([minDate, maxDate]))
+        .round(d3.timeMonth.round)
+        .alwaysUseRounding(true)
+        .xUnits(d3.timeMonths);
+
+    districtsChart
+        .margins({top: 0, right: 0, bottom: 20, left: 40})
+        .x(d3.scaleBand())
+        .xUnits(dc.units.ordinal)
+        .brushOn(false)
+        .dimension(districtDim)
+        .xAxisLabel('Region')
+        .yAxisLabel('Nombre d infraction')
+        .barPadding(0.1)
+        .elasticY(true)
+        .outerPadding(0.05)
+        .group(countPerRegion);
+
+    crimeTypeChart
+        .margins({top: 0, right: 0, bottom: 20, left: 40})
+        .x(d3.scaleBand())
+        .xUnits(dc.units.ordinal)
+        .brushOn(false)
+        .dimension(crimeTypeDim)
+        .xAxisLabel('Region')
+        .yAxisLabel('Nombre d infraction')
+        .barPadding(0.1)
+        .elasticY(true)
+        .outerPadding(0.05)
+        .group(countPerType);
+
+
+    volumeChart.render();
     moveChart.render();
 
 }

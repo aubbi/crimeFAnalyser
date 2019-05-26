@@ -1,4 +1,7 @@
 import json
+import os
+import shutil
+import uuid
 
 from django.core import serializers
 from django.shortcuts import render, redirect
@@ -42,12 +45,14 @@ def allDataPage(request):
 @login_required()
 def resumedData(request):
 
-    allData = pd.DataFrame(list(Crime.objects.all().values('Date','Primary_Type').annotate(crimes_Count=Count('id')).order_by('Date')))
+    allData = pd.DataFrame(list(Crime.objects.all().values('Date','Primary_Type','District').annotate(crimes_Count=Count('id')).order_by('Date')))
+    print(type(allData))
+    allData["Date"] = allData["Date"].apply(lambda x: x.strftime('%Y-%m-%d'))
     #allData['Date'] = allData['Date'].dt.strftime('%Y-%m-%d')
-    allData['Date'].apply(lambda x: x.strftime('%m/%d/%Y'))
+    #allData['Date'].apply(lambda x: x.strftime('%m/%d/%Y'))
     #print(type(allData))
     #allData['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
-    jsonData = allData.to_json(orient='records')
+    jsonData = allData.to_dict(orient='records')
     #print(jsonData)
     return JsonResponse({'data': jsonData})
 
@@ -289,6 +294,11 @@ def makeKmeans(request):
     return HttpResponse(json.dumps({'hi':to_return_Hi,'kmeans':to_return_Kmeans}))
 
 def clusterDistricts(request):
+    #remove the directory to clear the files
+    shutil.rmtree('static/visual/images/graphs')
+    #recreate the folder
+    os.mkdir('static/visual/images/graphs')
+
     startDate = request.POST['startDate']
     endDate = request.POST['endDate']
     k = int(request.POST['numberClusters'])
@@ -316,14 +326,21 @@ def clusterDistricts(request):
         plt.xlabel('Principal Component')
         plt.ylabel('Cumulative Proportion')
         plt.tight_layout()
-    plt.savefig('static/visual/images/graphs/pca_results.png')
+
+
+    #creating of path with unique id
+    pathPCAresult = 'static/visual/images/graphs/pca_results'+str(uuid.uuid4())+'.png'
+    plt.savefig(pathPCAresult)
 
     pcDF = pd.DataFrame(crimePCA.components_[0:4])
     pcDF = pcDF.transpose()
     pcDF.columns = ['PC1', 'PC2', 'PC3', 'PC4']
+    pcDF_copy = pcDF.copy()
     indexes = crimeArray.columns.tolist()
     pcDF.index = [indexes]
-    print(pcDF.sort_values(['PC1', 'PC2'], ascending=[False, False]))
+
+    PCAtableJSON = pcDF_copy.to_json(orient="records")
+    types  = json.dumps(indexes)
 
 
     crimeProject = pca.fit_transform(scale(crimeArray))
@@ -374,10 +391,14 @@ def clusterDistricts(request):
         plt.ylabel('Principal Component 2')
         plt.tight_layout()
 
-    plt.savefig('static/visual/images/graphs/clustered_districts.png')
+    #creation of unique id for cluster result image
+    pathClusterResult = 'static/visual/images/graphs/cluster_results' + str(uuid.uuid4()) + '.png'
+    plt.savefig(pathClusterResult)
+    #to avoid an error with plt
+    plt.close('all')
+    #regrouping paths in one dictionary
+    paths = {'pcaResult': pathPCAresult, 'clusterResult': pathClusterResult}
 
-
-    return HttpResponse('/hello')
-
+    return JsonResponse({'data': PCAtableJSON, 'types': types, 'paths': json.dumps(paths)})
 
 
