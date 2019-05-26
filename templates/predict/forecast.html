@@ -4,7 +4,6 @@
 
 
 
-
 <body class="keen-dashboard">
 <div class="jumbotron">
   <h4 class="display-4">Prévision de la criminalité</h4>
@@ -136,12 +135,76 @@
       <div id="accordion53" class="collapse" data-parent="#accordion5">
         <div class="card-body">
           <!--Here goes the 1st step code-->
-          <div id="prophet" style="display: none;">
-            <h4 class="display-8">Facebook Prophet</h4>
-            <div class="row">
-              <p>fdf</p>
-            </div>
-          </div>
+           <div id="prophet" style="display: block;">
+            <form action="{% url 'kmeans'  %}" method="post" id="filter_form">
+              {% csrf_token %}
+              <h4 class="header-title">Croissance</h4>
+              <div class="form-row">
+                  <b class="text-muted col-md-4 mb-3 mb-3 d-block">Mode de croissance</b>
+                  <br>
+                  <div class=" col-md-4 mb-3 custom-control custom-radio">
+                    <input type="radio" checked="" id="customRadio1" name="customRadio" class="custom-control-input">
+                    <label class="custom-control-label" for="customRadio1">Linéaire</label>
+                  </div>
+                  <div class="col-md-4 mb-3 custom-control custom-radio">
+                    <input type="radio" id="customRadio2" name="customRadio" class="custom-control-input">
+                    <label class="custom-control-label" for="customRadio2">Logistic</label>
+                  </div>
+                  <b class="text-muted col-md-4 mb-3 mb-3 d-block">Si le mode = Logistic</b>
+                  <div class="col-md-4 mb-3">
+                    <div class="form-group">
+                      <label for="end_date" class="col-form-label">Valeur min </label>
+                      <input class="form-control" name="valMin" value="0" id="valMin" type="number">
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <div class="form-group">
+                      <label for="end_date" class="col-form-label">Valeur max </label>
+                      <input class="form-control" name="valMax" value="1000" id="valMax" type="number">
+                    </div>
+                  </div>
+              </div>
+              <h4 class="header-title">Saisonnalité</h4>
+              <div class="form-row">
+                <b class="text-muted col-md-4 mb-3 mb-3 d-block">Mode saisonnalité</b>
+                <br>
+                <div class=" col-md-4 mb-3 custom-control custom-radio">
+                  <input type="radio"   id="modeAdditif" name="modeAdditif" class="custom-control-input">
+                  <label class="custom-control-label" for="modeAdditif">Additif</label>
+                </div>
+                <div class="col-md-4 mb-3 custom-control custom-radio">
+                  <input type="radio" id="modeMultiplicatif" name="modeMultiplicatif" class="custom-control-input">
+                  <label class="custom-control-label" for="modeMultiplicatif">Multiplicatif</label>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="col-md-4 mb-3">
+                  <div class="form-group">
+                    <label for="end_date" class="col-form-label">Ordre hebdomadaire </label>
+                    <input class="form-control" name="ordreHebdomadaire" value="5" id="ordreHebdomadaire" type="number">
+                  </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <div class="form-group">
+                    <label for="end_date" class="col-form-label">Ordre annuel </label>
+                    <input class="form-control" name="ordreAnnuel" value="10" id="ordreAnnuel" type="number">
+                  </div>
+                </div>
+              </div>
+                 <div class="col-md-4 mb-3">
+                  <div class="form-group">
+                    <label for="end_date" class="col-form-label">Echelle à priori</label>
+                    <input class="form-control" name="priorScale" required id="priorScale" type="numbre" value="10">
+                  </div>
+                </div>
+               </div>
+              <h4 class="header-title">Liste des jours fériés</h4>
+              <div class="form-row">
+                <input type="text" class="form-control date" placeholder="Choisissez des dates ">
+
+              </div>
+
+
           <div id="arima" id="arima" style="display: none;">
             <h4 class="display-8">ARIMA</h4>
             <div class="row">
@@ -166,7 +229,7 @@
 
     <div class="card">
       <div class="card-header">
-        <a class="collapsed card-link" data-toggle="collapse" href="#accordion54">Résultats #3</a>
+        <a class="collapsed card-link" data-toggle="collapse" href="#accordion54">Résultats et Interprétation #4 & #5</a>
       </div>
       <div id="accordion54" class="collapse" data-parent="#accordion5">
         <div class="card-body">
@@ -236,6 +299,14 @@
       }
     });
   });
+
+
+
+  $('.date').datepicker({
+      multidate: true,
+      format: 'dd-mm-yyyy'
+    });
+
 
 
 

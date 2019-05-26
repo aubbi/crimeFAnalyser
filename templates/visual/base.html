@@ -1,16 +1,16 @@
 {% load static %}
 
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="fr">
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>srtdash - Starter Template</title>
+    <title>CrimeAnalyzer - Visualisation et prévision de la criminalité | Gendarmerie Nationale</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{% static "/visual/assets/images/icon/logo.ico"" %}">
 
-
-    <link rel="stylesheet" href="{% static "/predict/css/select.css" %}">
+<link rel="stylesheet" href="{% static "/forecasting/css/select.css" %}">
 
     
     <link rel="shortcut icon" type="image/png" href="{% static "/visual/assets/images/icon/favicon.ico" %}">
@@ -64,18 +64,18 @@
                             <li class="active">
                                 <a href="javascript:void(0)" aria-expanded="true"><i class="ti-dashboard"></i><span>Tableau de bord</span></a>
                                 <ul class="collapse">
-                                    <li class="active"><a href="/vis/home">Visualisation des données</a></li>
+                                    <li><a href="/vis/home">Visualisation des données</a></li>
                                     <li><a href="/vis/map/">Carte géographiques agrégées</a></li>
                                     <li><a href="/vis/heat-map/">Carte de points chauds</a></li>
-                                    <li><a href="/vis/heat-map/">Clustering des zones</a></li>
-                                    <li><a href="/vis/heat-map/">Clustering des crimes</a></li>
+                                    <li><a href="/vis/cluster/">Clustering des zones</a></li>
+                                    <li><a href="/vis/cluster-district/">Clustering des crimes</a></li>
                                     <li><a href="/vis/compare/">Comparer des crimes</a></li>
                                 </ul>
                             </li>
                             <li class="active">
                                 <a href="javascript:void(0)" aria-expanded="true"><i class="ti-dashboard"></i><span>Dashboard</span></a>
                                 <ul class="collapse">
-                                    <li class="active"><a href="/predict/predict_type">Prévision</a></li>
+                                    <li><a href="/predict/make/">Prévision</a></li>
                                     <li><a href="/predict/instructions">Instructions</a></li>
                             </li>
                         </ul>
@@ -144,91 +144,7 @@
         </footer>
         <!-- footer area end-->
     </div>
-    <!-- page container area end -->
-    <!-- offset area start -->
-    <div class="offset-area">
-        <div class="offset-close"><i class="ti-close"></i></div>
-        <ul class="nav offset-menu-tab">
-            <li><a class="active" data-toggle="tab" href="#activity">Activity</a></li>
-            <li><a data-toggle="tab" href="#settings">Settings</a></li>
-        </ul>
-        <div class="offset-content tab-content">
-            <div id="activity" class="tab-pane fade in show active">
-                <div class="recent-activity">
-                    <div class="timeline-task">
-                        <div class="icon bg1">
-                            <i class="fa fa-envelope"></i>
-                        </div>
-                        <div class="tm-title">
-                            <h4>Rashed sent you an email</h4>
-                            <span class="time"><i class="ti-time"></i>09:35</span>
-                        </div>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse distinctio itaque at.
-                        </p>
-                    </div>
-                    <div class="timeline-task">
-                        <div class="icon bg2">
-                            <i class="fa fa-check"></i>
-                        </div>
-                        <div class="tm-title">
-                            <h4>Added</h4>
-                            <span class="time"><i class="ti-time"></i>7 Minutes Ago</span>
-                        </div>
-                        <p>Lorem ipsum dolor sit amet consectetur.
-                        </p>
-                    </div>
-                    <div class="timeline-task">
-                        <div class="icon bg2">
-                            <i class="fa fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="tm-title">
-                            <h4>You missed you Password!</h4>
-                            <span class="time"><i class="ti-time"></i>09:20 Am</span>
-                        </div>
-                    </div>
-                    <div class="timeline-task">
-                        <div class="icon bg3">
-                            <i class="fa fa-bomb"></i>
-                        </div>
-                        <div class="tm-title">
-                            <h4>Member waiting for you Attention</h4>
-                            <span class="time"><i class="ti-time"></i>09:35</span>
-                        </div>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse distinctio itaque at.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div id="settings" class="tab-pane fade">
-                <div class="offset-settings">
-                    <h4>General Settings</h4>
-                    <div class="settings-list">
-                        <div class="s-settings">
-                            <div class="s-sw-title">
-                                <h5>Notifications</h5>
-                                <div class="s-swtich">
-                                    <input type="checkbox" id="switch1" />
-                                    <label for="switch1">Toggle</label>
-                                </div>
-                            </div>
-                            <p>Keep it 'On' When you want to get all the notification.</p>
-                        </div>
-                        <div class="s-settings">
-                            <div class="s-sw-title">
-                                <h5>Show recent activity</h5>
-                                <div class="s-swtich">
-                                    <input type="checkbox" id="switch2" />
-                                    <label for="switch2">Toggle</label>
-                                </div>
-                            </div>
-                            <p>The for attribute is necessary to bind our custom checkbox with the input.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- offset area end -->
+  >
     <!-- jquery latest version -->
     <script src="{% static "/visual/assets/js/vendor/jquery-2.2.4.min.js" %}"></script>
     <!-- bootstrap 4 js -->
@@ -285,7 +201,22 @@
     <script src="{% static "/forecasting/js/plotlygraph.js" %}" type='text/javascript'></script>
 
 
+    <script>
+       
 
+        // When we click on the LI
+        $("ul.class > li").click(function () {
+            // If this isn't already active
+            if (!$(this).hasClass("active")) {
+                // Remove the class from anything that is active
+                $("li.active").removeClass("active");
+                // And make this active
+                $(this).addClass("active");
+            }
+        });
+    
+
+    </script>
 
 {% block scripts %}
 {% endblock %}
