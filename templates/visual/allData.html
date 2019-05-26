@@ -8,6 +8,12 @@
                         <div id="monthly-volume-chart"></div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-12 mt-5">
+                        <div id="district-chart"></div>
+                        <div id="type-chart"></div>
+                    </div>
+                </div>
                 <div class="row" id="graph" style="visibility: hidden">
                          <div class="col-xl-12 mt-2">
                             <div class="card">
@@ -94,8 +100,10 @@
 
         },*/
         success : function (response) {
-            console.log(response['data']);
-            //makeSomething(response);
+            var result = response['data'];
+            var result2= result;
+            console.log(result2);
+            makeSomething(result);
         },
         error : function (error) {
             alert(error);

@@ -26,13 +26,13 @@
                                                         <div class="col-md-4 mb-3">
                                                             <div class="form-group">
                                                                 <label for="end_date" class="col-form-label">Date début </label>
-                                                                <input class="form-control" name="startDate" required id="startDate" type="date">
+                                                                <input class="form-control" name="startDate" value="2015-01-01" required id="startDate" type="date">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4 mb-3">
                                                             <div class="form-group">
                                                                 <label for="end_date" class="col-form-label">Date fin </label>
-                                                                <input class="form-control" name="endDate" required id="endDate" type="date">
+                                                                <input class="form-control" name="endDate" value="2016-01-01" required id="endDate" type="date">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -57,8 +57,30 @@
                                         </div>
                                         <div id="accordion11" class="collapse hide" data-parent="#accordion1" style="">
                                             <div class="card-body">
-                                                <div class="col-sm-6 offset-3">
-                                                    <div id="pca_result"></div>
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div id="pca_result"></div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="single-table">
+                                                            <div class="table-responsive">
+                                                                <table class="table text-center">
+                                                                    <thead class="text-uppercase bg-primary">
+                                                                        <tr class="text-white">
+                                                                            <th scope="col">Type</th>
+                                                                            <th scope="col">CP1</th>
+                                                                            <th scope="col">CP2</th>
+                                                                            <th scope="col">CP3</th>
+                                                                            <th scope="col">CP4</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody id="table-body">
+
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -67,7 +89,7 @@
                         </div>
                         <div class="card">
                             <div class="card-body">
-                                <div class="" id="image_result">
+                                <div id="image_result">
 
                                 </div>
                             </div>
@@ -82,6 +104,12 @@
         var token = '{{csrf_token}}';
         $(document).on('submit', '#filter_form', function(e){
 
+            if(document.getElementById('image1')){
+                document.getElementById('image1');
+            };
+            if(document.getElementById('image2')){
+                document.getElementById('image2').remove();
+            };
             e.preventDefault();
             $.ajax({
                 headers: { "X-CSRFToken": token },
@@ -94,16 +122,32 @@
                 },
                 success : function (response) {
                     var element  = document.getElementById('pca_result');
-                    element.innerHTML = '<image src="../../static/visual/images/graphs/pca_results.png">';
-
                     var element1  = document.getElementById('image_result');
-                    element1.innerHTML = '<image src="../../static/visual/images/graphs/clustered_districts.png">';
+
+                    //if(element1.innerHTML !== ''){element1.innerHTML = '';};
+                    paths = JSON.parse(response['paths']);
+                    console.log(paths);
+
+                    element.innerHTML = '<image id="image1" src="../../'+paths['pcaResult']+'">';
+                    element1.innerHTML = '<image id="image2" src="../../'+paths['clusterResult']+'">';
 
                     var element2 = document.getElementById('result');
                     if(element2.style.visibility =='hidden'){
                         element2.style.visibility = 'visible';
                     };
-                    //console.log(response);
+                    values = JSON.parse(response['data']);
+                    types = JSON.parse(response['types']);
+                    var html = '';
+                    i = 0;
+                    for(var i;i<26;i++){
+                        html+= '<tr><th>'+types[i]+'</th>'+'<th>'+values[i]['PC1']+'</th>'+
+                                '<th>'+values[i]['PC2']+'</th>'+'<th>'+values[i]['PC3']+'</th>'+
+                                '<th>'+values[i]['PC4']+'</th></tr>'
+                    }
+                    //console.log(JSON.parse(response['data']));
+                    //console.log(JSON.parse(response['types']));
+                    var table =document.getElementById('table-body');
+                    table.innerHTML = html;
                 },
                 error : function (msg) {
                     alert('no response');
