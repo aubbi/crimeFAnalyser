@@ -131,9 +131,18 @@
                     </div>
                 </div>
 
+    <div class="modal"><!-- Place at bottom of page --></div>
+
 {% endblock %}
 {% block scripts %}
     <script type="text/javascript">
+
+    $body = $("body");
+
+    $(document).on({
+        ajaxStart: function() { $body.addClass("loading");    },
+        ajaxStop: function() { $body.removeClass("loading"); }
+    });
 
         var token = '{{csrf_token}}';
         $(document).on('submit', '#filter_form', function(e){

@@ -97,10 +97,17 @@
                         </div>
                     </div>
                 </div>
+    <div class="modal"><!-- Place at bottom of page --></div>
 
 {% endblock %}
 {% block scripts %}
     <script type="text/javascript">
+    $body = $("body");
+
+    $(document).on({
+        ajaxStart: function() { $body.addClass("loading");    },
+        ajaxStop: function() { $body.removeClass("loading"); }
+    });
         // this function will generate a png file of the element provided by ID
         function toPNG() {
             var options = {};

@@ -234,29 +234,34 @@
       <div id="accordion54" class="collapse" data-parent="#accordion5">
         <div class="card-body">
            <!-- Plotly.js -->
-            <div class="row">
-              <div style="height: 600px; width: 100%" id="firstForecast"></div>
-            </div>
-            
-            <div class="row">
-               <div style="height: 600px; width: 100%" id="myDiv"></div>
-            </div>
-           
-            <div class="row">
+           <div class="row">
                 <div style="height: 600px; width: 100%" id="chartdiv"></div>
             </div>
+
+            <div class="row">
+               <div style="height: 600px; width: 1200px" id="myDiv"></div>
+            </div>
+            <h4>3. Exactitude du modèle</h4>
+<div class="row">
+<div style="height: 600px; width: 100%" id="">
+<ul>
+<li>RMSE = 41.67 </li>
+<li>MAPE = <span color='red'>7.8%</span></li>
+</ul>
+</div>
+</div>
+
         </div>
+
       </div>
-      <div class="row">
-        <div style="height: 600px; width: 100%" id="myDiv"></div>
-      </div>
+
       </div>
     </div>
   </div>
  
 </div>
 
-
+<div class="modal"><!-- Place at bottom of page --></div>
 
 {% endblock %}
 
@@ -264,10 +269,16 @@
 
 <script type="text/javascript">
 
+$body = $("body");
+
+    $(document).on({
+        ajaxStart: function() { $body.addClass("loading");    },
+        ajaxStop: function() { $body.removeClass("loading"); }
+    });
+
   var token = '{{csrf_token}}';
 
   $(document).on('submit', '#forecast_form', function (e) {
-    alert('heeeeey');
     e.preventDefault();
     var crimesSelected = [];
     $(".crimeBox:checked").each(function () {
@@ -288,9 +299,8 @@
         endDate: $("#end_date").val(),
       },
       success: function (result) {
-        alert('success');
+
         forecastChart(result);
-        console.log("i am here");
         forecastTrend(result);
         forecastAll(result);
       },
