@@ -13,6 +13,7 @@ from visual.models import Crime
 from django.db.models import Count, Sum, IntegerField
 from django.db.models.functions import Cast
 from datetime import datetime
+from sklearn.preprocessing import StandardScaler
 
 from sklearn.cluster import KMeans, AgglomerativeClustering
 #from statsmodels.tsa.seasonal import seasonal_decompose
@@ -29,6 +30,8 @@ listofCrimesGlobal=['Agression','Violation de l ordre publique','Vol','Infractio
 'Vol de vehicule a  moteur','Autre infraction','Pratique deceptive','Dommage criminel','Transgression penale','Cambriolage',
 'Harcelement','Agression sexuelle','Narcotique','Infraction sexuelle','Autre','Infraction d enfants','Kidnapping','Jeu d argent','Incendie volontaire',
 'Vilation des liee a l alcool','Obscenite','Non penal','indecence publique','Trafic humain','Violation de licence de trasport','Autre violation narcotique']
+
+listOfRegions = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','22','24','25','31']
 
 @login_required
 def index(request):
@@ -350,6 +353,31 @@ def clusterDistricts(request):
     for i in range(1, len(sector)):
         crime2 = np.vstack([crime2, crimeProject[i, 0:2]])
 
+    #finding the optimal number of clusters
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(crime2)
+    cluster_range = range(1, 20)
+    cluster_errors = []
+
+    for num_clusters in cluster_range:
+        clusters = KMeans(num_clusters)
+        clusters.fit(X_scaled)
+        cluster_errors.append(clusters.inertia_)
+
+    clusters_df = pd.DataFrame({"num_clusters": cluster_range, "cluster_errors": cluster_errors})
+
+    plt.style.context('seaborn-whitegrid')
+    plt.figure(figsize=(6, 4))
+    font = {'weight': 'bold','size': 18}
+    plt.rc('font', **font)
+    plt.plot(clusters_df.num_clusters, clusters_df.cluster_errors, marker="o")
+    plt.xlabel('N cluster')
+    plt.ylabel('Erreur')
+    plt.tight_layout()
+    pathOptimalNumberOfClusters = 'static/visual/images/graphs/optimal' + str(uuid.uuid4()) + '.png'
+    plt.savefig(pathOptimalNumberOfClusters)
+
+
     kmeans = KMeans(n_clusters=k, random_state=123, n_init=10).fit_predict(crime2)
 
     colors = []
@@ -397,8 +425,17 @@ def clusterDistricts(request):
     #to avoid an error with plt
     plt.close('all')
     #regrouping paths in one dictionary
-    paths = {'pcaResult': pathPCAresult, 'clusterResult': pathClusterResult}
+    paths = {'pcaResult': pathPCAresult, 'clusterResult': pathClusterResult, 'numberClusters': pathOptimalNumberOfClusters}
 
-    return JsonResponse({'data': PCAtableJSON, 'types': types, 'paths': json.dumps(paths)})
+
+    #labels = json.dumps(kmesh.labels_)
+    #dic_labels = {}
+    #dic_labels['labels'] = kmesh.labels_
+    labels = pd.Series(kmesh.labels_).to_json(orient='values')
+    regions = json.dumps(sector)
+
+
+    return JsonResponse({'data': PCAtableJSON, 'types': types, 'paths': json.dumps(paths),
+                         'labels': labels, 'regions': regions})
 
 

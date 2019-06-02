@@ -59,7 +59,12 @@
                                             <div class="card-body">
                                                 <div class="row">
                                                     <div class="col-sm-6">
-                                                        <div id="pca_result"></div>
+                                                        <div class="row">
+                                                            <div id="pca_result"></div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div id="numberClusters"></div>
+                                                        </div>
                                                     </div>
                                                     <div class="col-sm-6">
                                                         <div class="single-table">
@@ -96,6 +101,15 @@
                         </div>
                     </div>
                 </div>
+    <div    class="row">
+        <div class="col-xl-12 mt-2">
+                        <div class="card">
+                            <div class="card-body" id="parent">
+                                <div id="map-clusters" style="width: 100%; height: 500px"></div>
+                            </div>
+                        </div>
+        </div>
+    </div>
     <div class="modal"><!-- Place at bottom of page --></div>
 
 {% endblock %}
@@ -120,6 +134,9 @@
             if(document.getElementById('image2')){
                 document.getElementById('image2').remove();
             };
+            if(document.getElementById('image3')){
+                document.getElementById('image3').remove();
+            };
             e.preventDefault();
             $.ajax({
                 headers: { "X-CSRFToken": token },
@@ -131,15 +148,18 @@
                     endDate: $("#endDate").val(),
                 },
                 success : function (response) {
+                    console.log(response['regions']);
+                    console.log(response['labels']);
                     var element  = document.getElementById('pca_result');
                     var element1  = document.getElementById('image_result');
+                    var elementX  = document.getElementById('numberClusters');
 
                     //if(element1.innerHTML !== ''){element1.innerHTML = '';};
                     paths = JSON.parse(response['paths']);
-                    console.log(paths);
 
                     element.innerHTML = '<image id="image1" src="../../'+paths['pcaResult']+'">';
                     element1.innerHTML = '<image id="image2" src="../../'+paths['clusterResult']+'">';
+                    elementX.innerHTML = '<image id="image3" src="../../'+paths['numberClusters']+'">';
 
                     var element2 = document.getElementById('result');
                     if(element2.style.visibility =='hidden'){
@@ -158,6 +178,8 @@
                     //console.log(JSON.parse(response['types']));
                     var table =document.getElementById('table-body');
                     table.innerHTML = html;
+                    document.getElementById('parent').innerHTML = '<div id="map-clusters" style="width: 100%; height: 500px"></div>'
+                    makeMapForClustering(response['regions'], response['regions'], $("#clusters").val());
                 },
                 error : function (msg) {
                     alert('no response');

@@ -112,9 +112,17 @@
                 <div class="row">
                          <div class="col-xl-12 mt-2">
                             <div class="card">
-                                <div class="card-body" id="mapParent">
-                                    <h4 class="header-title">Crimes</h4>
-                                    <div id="map0" style="width: 100%; height: 500px"></div>
+                                <div class="card-body" >
+                                    <div class="row" id="mapParent">
+                                            <div class="col-sm-8 ">
+                                                <h4 class="header-title mb-0">Crimes</h4>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <button class="pull-right btn btn-rounded btn-light mb-3"  onclick="toPNG('map0', 'map')" ><span class="fa fa-download"></span></button>
+                                            </div>
+                                        <div id="map0" style="width: 100%; height: 500px"></div>
+                                    </div>
+
                                 </div>
                             </div>
                          </div>
