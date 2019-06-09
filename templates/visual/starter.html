@@ -1,5 +1,5 @@
 {% extends 'visual/base.html' %}
-
+{% block page_name %} Tableau de bord {% endblock %}
 {% block content %}
                 <div class="row">
                     <div class="col-xl-3">
@@ -31,7 +31,7 @@
                                                     <input type="date" class="form-control" id="endDate" placeholder="">
                                                 </div>
                                                 <div class="col-sm-4 my-1">
-                                                    <button type="submit" class="btn btn-block btn-primary">Submit</button>
+                                                    <button type="submit" class="btn btn-block btn-primary">Soumettre</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -43,10 +43,10 @@
                                 <div class="card mt-2">
                                     <div class="card-body">
                                         <div class="row">
-                                            <button onclick="dc.filterAll(); dc.redrawAll();" class="btn btn-block btn-primary">Reset filters</button>
+                                            <button onclick="dc.filterAll(); dc.redrawAll();" class="btn btn-block btn-danger">Annuler les filters</button>
                                         </div>
                                         <div class="row">
-                                            <button class="btn btn-block" id="download-csv">Télécharger les données (csv)</button>
+                                            <button class="btn btn-block btn-success" id="download-csv">Télécharger les données (csv)</button>
                                         </div>
                                     </div>
                                 </div>

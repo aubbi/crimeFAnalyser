@@ -31,7 +31,13 @@ listofCrimesGlobal=['Agression','Violation de l ordre publique','Vol','Infractio
 'Harcelement','Agression sexuelle','Narcotique','Infraction sexuelle','Autre','Infraction d enfants','Kidnapping','Jeu d argent','Incendie volontaire',
 'Vilation des liee a l alcool','Obscenite','Non penal','indecence publique','Trafic humain','Violation de licence de trasport','Autre violation narcotique']
 
-listOfRegions = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','22','24','25','31']
+listOfRegionsGlobal = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','22','24','25','31']
+
+
+@login_required
+def showLandingPage(request):
+    return render(request, 'visual/landing.html')
+
 
 @login_required
 def index(request):
@@ -63,8 +69,10 @@ def resumedData(request):
 def showMap(request):
     global listofCrimesGlobal
     listOfCrimes = listofCrimesGlobal
+    listOfRegions = listOfRegionsGlobal
     context = {
-        'crimes': listOfCrimes
+        'crimes': listOfCrimes,
+        'regions': listOfRegions,
     }
     return render(request, 'visual/mapNormal.html', context)
 
@@ -73,14 +81,22 @@ def cluster(request):
     return render(request,'visual/clustering.html')
 
 def cluster_district(request):
-    return render(request, 'visual/districts_cluster.html')
+    listOfCrimes = listofCrimesGlobal
+    listOfRegions = listOfRegionsGlobal
+    context = {
+        'crimes': listOfCrimes,
+        'regions': listOfRegions,
+    }
+    return render(request, 'visual/districts_cluster.html', context)
 
 @login_required
 def showHeatMap(request):
     global listofCrimesGlobal
     listOfCrimes = listofCrimesGlobal
+    listOfRegions = listOfRegionsGlobal
     context = {
-        'crimes': listOfCrimes
+        'crimes': listOfCrimes,
+        'regions' : listOfRegions
     }
     return render(request, 'visual/heatMap.html', context)
 
@@ -123,11 +139,12 @@ def getDataPerYear( year, types):
 
 def filterData(request):
     types = request.POST.getlist('types[]')
+    regions = request.POST.getlist('regions[]')
     startDate = request.POST['startDate']
     endDate = request.POST['endDate']
     arrest = request.POST.getlist('arrest[]')
     print(startDate, endDate, arrest, types)
-    rawData = Crime.objects.filter(Date__range=[startDate, endDate], Arrest__in=arrest, Primary_Type__in=types)
+    rawData = Crime.objects.filter(Date__range=[startDate, endDate], Arrest__in=arrest, Primary_Type__in=types, District__in=regions)
     result = []
     for i in rawData.values():
         i['Date'] = i['Date'].strftime('%m/%d/%Y')
@@ -302,11 +319,15 @@ def clusterDistricts(request):
     #recreate the folder
     os.mkdir('static/visual/images/graphs')
 
+    types = request.POST.getlist('types[]')
+    regions = request.POST.getlist('regions[]')
     startDate = request.POST['startDate']
     endDate = request.POST['endDate']
+
     k = int(request.POST['numberClusters'])
 
-    df = pd.DataFrame(list(Crime.objects.filter(Date__range=[startDate, endDate]).values('Case_Number','Primary_Type','District')
+    df = pd.DataFrame(list(Crime.objects.filter(Date__range=[startDate, endDate], Primary_Type__in=types, District__in=regions)
+                           .values('Case_Number','Primary_Type','District')
                             .annotate(count=Count('id'))))
     crimeArray = df.groupby(['Primary_Type', 'District'])['District'].count().unstack()
     crimeArray = crimeArray.transpose()

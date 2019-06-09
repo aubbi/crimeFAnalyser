@@ -8,6 +8,7 @@ urlpatterns = [
     path('show-all/', views.allDataPage, name='show-all'),
     url(r'getData', views.getData, name="getData"),
     url(r'data/', views.defaultHome),
+    path('landing-page/', views.showLandingPage),
     url(r'allData/', views.resumedData),
     path('map/', views.showMap),
     path('heat-map/', views.showHeatMap),

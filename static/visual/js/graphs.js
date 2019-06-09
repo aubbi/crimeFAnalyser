@@ -460,6 +460,7 @@ function makeHeatMap(records, rendered) {
         heatMap.remove();
 
     };
+
     heatMap = L.map('map');
     //if(heatMap != undefined || heatMap != null)
     //adding print map fonctionality
@@ -475,15 +476,13 @@ function makeHeatMap(records, rendered) {
     var ndx = crossfilter(records);
     var total = ndx.groupAll();
     var allDim = ndx.dimension(function (d) {return d;});
-        heatMap.setView([41.8781,-87.6298],8);
+        heatMap.setView([41.8781,-87.6298],10);
         mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
         L.tileLayer(
 			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				attribution: '&copy; ' + mapLink + ' Contributors',
-				maxZoom: 15,
+				maxZoom: 30,
 			}).addTo(heatMap);
-
-
 
         //HeatMap
         var geoData = [];
@@ -492,9 +491,10 @@ function makeHeatMap(records, rendered) {
             geoData.push([d["Latitude"], d["Longitude"]]);
         });
         var heat = L.heatLayer(geoData, {
-            radius: 10,
-            blur: 20,
+            radius: 15,
+            blur: 15,
             maxZoom: 1,
+
         }).addTo(heatMap);
 
         var numberRecords = dc.numberDisplay('#total-number');
@@ -503,9 +503,10 @@ function makeHeatMap(records, rendered) {
         .formatNumber(d3.format("d"))
         .valueAccessor(function (d) {return d;})
         .group(total);
-
         numberRecords.render();
 
+
+    return [heatMap, heat];
 };
 
 function getRandomColor() {
@@ -882,6 +883,14 @@ function makeSomething(records) {
     moveChart.render();
 
 }
+//to check all the checkboxes at once.
+function toggle(source, name) {
+            var checkboxes = document.querySelectorAll('input[name="'+name+'"]');
+            for (var i = 0; i < checkboxes.length; i++) {
+                 if (checkboxes[i] != source)
+                    checkboxes[i].checked = source.checked;
+                 }
+            }
 
 
 
