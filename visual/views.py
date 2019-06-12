@@ -347,8 +347,8 @@ def clusterDistricts(request):
         plt.rc('font', **font)
 
         plt.plot(range(1, len(cumsum) + 1), cumsum, '-o', color='b')
-        plt.xlabel('Principal Component')
-        plt.ylabel('Cumulative Proportion')
+        plt.xlabel('Composante principale')
+        plt.ylabel('Taux d information')
         plt.tight_layout()
 
 
@@ -436,8 +436,8 @@ def clusterDistricts(request):
             plt.scatter(crime2[i, 0], crime2[i, 1], s=250, color=kcolors[i])
             plt.annotate(labels, (crime2[i, 0], crime2[i, 1]))
 
-        plt.xlabel('Principal Component 1')
-        plt.ylabel('Principal Component 2')
+        plt.xlabel('Composante principale 1')
+        plt.ylabel('Composante principale 2')
         plt.tight_layout()
 
     #creation of unique id for cluster result image

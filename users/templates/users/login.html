@@ -42,7 +42,7 @@
                 <form method="post" action="{% url 'login' %}">
                     {% csrf_token %}
                     <div class="login-form-head">
-                        <h4>CrimeAnalyzer GN-CRD</h4>
+                        <img src="../../../static/visual/assets/images/icon/logo%20white.png">
                         {% if form.errors %}
                             <div class="alert btn-danger alert-dismissible fade show" role="alert">
                                  <p>Your username and password didn't match. Please try again.</p>
