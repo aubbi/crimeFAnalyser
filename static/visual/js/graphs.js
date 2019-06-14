@@ -37,7 +37,30 @@ function makeGraphs(records) {
     var crimeTypeGroup = crimeTypeDim.group();
     var districtGroup = districtDim.group();
     var all = ndx.groupAll();
-    var geoGroup = geoDim.group();
+    //var geoGroup = geoDim.group();
+    var geoGroup = geoDim.group().reduce(
+            function(p, v) {
+              p.Primary_Type = v.Primary_Type;
+              p.Arrest = v.Arrest;
+              p.Location_Description = v.Location_Description;
+              p.Case_Number = v.Case_Number;
+              p.Code_Penal = v.Code_Penal;
+              p.Date = v.Date;
+              ++p.count;
+              return p;
+          },
+          function(p, v) {
+              --p.count;
+              return p;
+          },
+          function() {
+              return {count: 0};
+          }
+                );
+
+
+
+
 
     //Define Values
     var minDate = dateDim.bottom(1)[0]["Date"];
@@ -175,9 +198,16 @@ function makeGraphs(records) {
         .group(geoGroup)
         .center([41.8781,-87.6298])
         .zoom(9)
+        .valueAccessor(d => d.value['Date']
+                    +", Type:"+d.value['Primary_Type']
+                    +", Arrest : "+ d.value['Arrest']
+                    +", Description du lieu:  "+ d.value['Location_Description']
+                    +", Numero du cas:  "+ d.value['Case_Number']
+                    +", Code penal:  "+ d.value['Code_Penal'])
         .fitOnRender(false)
         .fitOnRedraw(false)
         .cluster(true)
+        .filterByArea(true)
         .brushOn(false);
 
     dayOfWeekChart
@@ -238,7 +268,7 @@ function makeGraphs(records) {
 
     drawMap();
     //drawMap2();
-   dcCharts = [timeChart, arrestChart, crimeTypeChart, crimeMap];
+   dcCharts = [timeChart, arrestChart, crimeTypeChart, crimeMap, districtsChart, dayOfWeekChart];
 
     _.each(dcCharts, function (dcChart) {
         dcChart.on("filtered", function(chart, filter){
@@ -256,6 +286,14 @@ function makeGraphs(records) {
         dc.renderAll();
 
     })*/
+
+    d3.select('#download-csv')
+        .on('click', function () {
+            var data = allDim.top(Infinity);
+            var blob = new Blob([d3.csvFormat(data)], {type: "text/csv;charset=utf-8"});
+            saveAs(blob, 'data.csv');
+        })
+
     return [dc, ndx, dcCharts];
 }
 //this makes the normal map with markers clustered
@@ -272,6 +310,10 @@ function makeMap(records, id){
             function(p, v) {
               p.Primary_Type = v.Primary_Type;
               p.Arrest = v.Arrest;
+              p.Location_Description = v.Location_Description;
+              p.Case_Number = v.Case_Number;
+              p.Code_Penal = v.Code_Penal;
+              p.Date = v.Date;
               ++p.count;
               return p;
           },
@@ -290,11 +332,23 @@ function makeMap(records, id){
             .group(geoGroup)
             .center([41.8781,-87.6298])
             .fitOnRender(true)
-            .valueAccessor(d => d.value['Primary_Type'])
-            .popup(function (d, marker) {
+            //.valueAccessor(d => d.value['Primary_Type'])
+            .valueAccessor(d => d.value['Date']
+                    +", Type:"+d.value['Primary_Type']
+                    +", Arrest : "+ d.value['Arrest']
+                    +", Description du lieu:  "+ d.value['Location_Description']
+                    +", Numero du cas:  "+ d.value['Case_Number']
+                    +", Code penal:  "+ d.value['Code_Penal'])
+            /*.popup(function (d, marker) {
+                var text = d.value['Date']
+                    +", Type:"+d.value['Primary_Type']
+                    +", Arrest : "+ d.value['Arrest']
+                    +", Description du lieu:  "+ d.value['Location_Description']
+                    +", Numero du cas:  "+ d.value['Case_Number']
+                    +", Code penal:  "+ d.value['Code_Penal'];
+                return text;
 
-                return d.value['Primary_Type']+ ', Arrest : '+ d.value['Arrest'];
-            })
+            })*/
             /*.icon(function(d,map) {
                 var iconUrl;
                 console.log('hello babe');
@@ -320,6 +374,8 @@ function makeMap(records, id){
             .fitOnRedraw(true)
             .cluster(true);
        crimeMap.render();
+
+
 
 };
 
@@ -404,6 +460,7 @@ function makeHeatMap(records, rendered) {
         heatMap.remove();
 
     };
+
     heatMap = L.map('map');
     //if(heatMap != undefined || heatMap != null)
     //adding print map fonctionality
@@ -419,15 +476,13 @@ function makeHeatMap(records, rendered) {
     var ndx = crossfilter(records);
     var total = ndx.groupAll();
     var allDim = ndx.dimension(function (d) {return d;});
-        heatMap.setView([41.8781,-87.6298],6);
+        heatMap.setView([41.8781,-87.6298],10);
         mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
         L.tileLayer(
 			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				attribution: '&copy; ' + mapLink + ' Contributors',
-				maxZoom: 15,
+				maxZoom: 30,
 			}).addTo(heatMap);
-
-
 
         //HeatMap
         var geoData = [];
@@ -436,9 +491,10 @@ function makeHeatMap(records, rendered) {
             geoData.push([d["Latitude"], d["Longitude"]]);
         });
         var heat = L.heatLayer(geoData, {
-            radius: 10,
-            blur: 20,
+            radius: 15,
+            blur: 15,
             maxZoom: 1,
+
         }).addTo(heatMap);
 
         var numberRecords = dc.numberDisplay('#total-number');
@@ -447,10 +503,95 @@ function makeHeatMap(records, rendered) {
         .formatNumber(d3.format("d"))
         .valueAccessor(function (d) {return d;})
         .group(total);
-
         numberRecords.render();
 
+
+    return [heatMap, heat];
 };
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.round(Math.random() * 15)];
+    }
+    return color;
+}
+
+
+function makeMapForClustering(regions, labels, k){
+
+    var container = L.DomUtil.get('map-clusters');
+      if(container != null){
+        container._leaflet_id = null;
+      }
+
+    colors = [];
+    for(var i=0; i<k;i++){
+        colors[i] = getRandomColor();
+    }
+
+
+    mapForClusters = L.map('map-clusters');
+    //if(heatMap != undefined || heatMap != null)
+    //adding print map fonctionality
+    var printer = L.easyPrint({
+      		tileLayer: 'something',
+      		sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
+      		filename: 'heatMap',
+      		exportOnly: true,
+		}).addTo(mapForClusters);
+
+     var geoJsonLayer = new L.GeoJSON.AJAX("/static/visual/b.geojson",
+         {
+         style: function (feature) {
+             var district = feature.properties.dist_num;
+             var index = regions.indexOf(parseInt(district));
+             if(index !== -1){
+                 var cluster = labels[index];
+                //console.log(district, index, cluster, colors[cluster]);
+                return {
+                radius: 8,
+				fillColor: colors[cluster],
+				color: "#000",
+				weight: 1,
+				opacity: 1,
+				fillOpacity: 0.8}
+             }else return {fillColor: "#ff7800"}
+
+         }},
+         {
+            onEachFeature: forEachFeature
+         },
+     );
+
+
+     geoJsonLayer.addTo(mapForClusters);
+
+        mapForClusters.setView([41.8781,-87.6298],10);
+        mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+        L.tileLayer(
+			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; ' + mapLink + ' Contributors',
+				maxZoom: 15,
+			}).addTo(mapForClusters);
+
+
+}
+
+
+function forEachFeature(feature, layer) {
+		var popupContent = "'<h1>'+ feature.properties.dist_num+'</h1>'";
+		console.log(popupContent);
+
+		if (feature.properties && feature.properties.popupContent) {
+			popupContent += feature.properties.popupContent;
+		}
+
+		layer.bindPopup(popupContent);
+	};
+
+
 
 //this for statistic insights from data
 function groupArrayAdd(keyfn) {
@@ -742,6 +883,14 @@ function makeSomething(records) {
     moveChart.render();
 
 }
+//to check all the checkboxes at once.
+function toggle(source, name) {
+            var checkboxes = document.querySelectorAll('input[name="'+name+'"]');
+            for (var i = 0; i < checkboxes.length; i++) {
+                 if (checkboxes[i] != source)
+                    checkboxes[i].checked = source.checked;
+                 }
+            }
 
 
 

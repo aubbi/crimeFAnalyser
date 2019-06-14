@@ -13,6 +13,7 @@ from visual.models import Crime
 from django.db.models import Count, Sum, IntegerField
 from django.db.models.functions import Cast
 from datetime import datetime
+from sklearn.preprocessing import StandardScaler
 
 from sklearn.cluster import KMeans, AgglomerativeClustering
 #from statsmodels.tsa.seasonal import seasonal_decompose
@@ -29,6 +30,14 @@ listofCrimesGlobal=['Agression','Violation de l ordre publique','Vol','Infractio
 'Vol de vehicule a  moteur','Autre infraction','Pratique deceptive','Dommage criminel','Transgression penale','Cambriolage',
 'Harcelement','Agression sexuelle','Narcotique','Infraction sexuelle','Autre','Infraction d enfants','Kidnapping','Jeu d argent','Incendie volontaire',
 'Vilation des liee a l alcool','Obscenite','Non penal','indecence publique','Trafic humain','Violation de licence de trasport','Autre violation narcotique']
+
+listOfRegionsGlobal = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','22','24','25','31']
+
+
+@login_required
+def showLandingPage(request):
+    return render(request, 'visual/landing.html')
+
 
 @login_required
 def index(request):
@@ -60,8 +69,10 @@ def resumedData(request):
 def showMap(request):
     global listofCrimesGlobal
     listOfCrimes = listofCrimesGlobal
+    listOfRegions = listOfRegionsGlobal
     context = {
-        'crimes': listOfCrimes
+        'crimes': listOfCrimes,
+        'regions': listOfRegions,
     }
     return render(request, 'visual/mapNormal.html', context)
 
@@ -70,14 +81,22 @@ def cluster(request):
     return render(request,'visual/clustering.html')
 
 def cluster_district(request):
-    return render(request, 'visual/districts_cluster.html')
+    listOfCrimes = listofCrimesGlobal
+    listOfRegions = listOfRegionsGlobal
+    context = {
+        'crimes': listOfCrimes,
+        'regions': listOfRegions,
+    }
+    return render(request, 'visual/districts_cluster.html', context)
 
 @login_required
 def showHeatMap(request):
     global listofCrimesGlobal
     listOfCrimes = listofCrimesGlobal
+    listOfRegions = listOfRegionsGlobal
     context = {
-        'crimes': listOfCrimes
+        'crimes': listOfCrimes,
+        'regions' : listOfRegions
     }
     return render(request, 'visual/heatMap.html', context)
 
@@ -120,11 +139,12 @@ def getDataPerYear( year, types):
 
 def filterData(request):
     types = request.POST.getlist('types[]')
+    regions = request.POST.getlist('regions[]')
     startDate = request.POST['startDate']
     endDate = request.POST['endDate']
     arrest = request.POST.getlist('arrest[]')
     print(startDate, endDate, arrest, types)
-    rawData = Crime.objects.filter(Date__range=[startDate, endDate], Arrest__in=arrest, Primary_Type__in=types)
+    rawData = Crime.objects.filter(Date__range=[startDate, endDate], Arrest__in=arrest, Primary_Type__in=types, District__in=regions)
     result = []
     for i in rawData.values():
         i['Date'] = i['Date'].strftime('%m/%d/%Y')
@@ -299,11 +319,15 @@ def clusterDistricts(request):
     #recreate the folder
     os.mkdir('static/visual/images/graphs')
 
+    types = request.POST.getlist('types[]')
+    regions = request.POST.getlist('regions[]')
     startDate = request.POST['startDate']
     endDate = request.POST['endDate']
+
     k = int(request.POST['numberClusters'])
 
-    df = pd.DataFrame(list(Crime.objects.filter(Date__range=[startDate, endDate]).values('Case_Number','Primary_Type','District')
+    df = pd.DataFrame(list(Crime.objects.filter(Date__range=[startDate, endDate], Primary_Type__in=types, District__in=regions)
+                           .values('Case_Number','Primary_Type','District')
                             .annotate(count=Count('id'))))
     crimeArray = df.groupby(['Primary_Type', 'District'])['District'].count().unstack()
     crimeArray = crimeArray.transpose()
@@ -323,8 +347,8 @@ def clusterDistricts(request):
         plt.rc('font', **font)
 
         plt.plot(range(1, len(cumsum) + 1), cumsum, '-o', color='b')
-        plt.xlabel('Principal Component')
-        plt.ylabel('Cumulative Proportion')
+        plt.xlabel('Composante principale')
+        plt.ylabel('Taux d information')
         plt.tight_layout()
 
 
@@ -349,6 +373,31 @@ def clusterDistricts(request):
     crime2 = np.array(crimeProject[0, 0:2])
     for i in range(1, len(sector)):
         crime2 = np.vstack([crime2, crimeProject[i, 0:2]])
+
+    #finding the optimal number of clusters
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(crime2)
+    cluster_range = range(1, 20)
+    cluster_errors = []
+
+    for num_clusters in cluster_range:
+        clusters = KMeans(num_clusters)
+        clusters.fit(X_scaled)
+        cluster_errors.append(clusters.inertia_)
+
+    clusters_df = pd.DataFrame({"num_clusters": cluster_range, "cluster_errors": cluster_errors})
+
+    plt.style.context('seaborn-whitegrid')
+    plt.figure(figsize=(6, 4))
+    font = {'weight': 'bold','size': 18}
+    plt.rc('font', **font)
+    plt.plot(clusters_df.num_clusters, clusters_df.cluster_errors, marker="o")
+    plt.xlabel('N cluster')
+    plt.ylabel('Erreur')
+    plt.tight_layout()
+    pathOptimalNumberOfClusters = 'static/visual/images/graphs/optimal' + str(uuid.uuid4()) + '.png'
+    plt.savefig(pathOptimalNumberOfClusters)
+
 
     kmeans = KMeans(n_clusters=k, random_state=123, n_init=10).fit_predict(crime2)
 
@@ -387,8 +436,8 @@ def clusterDistricts(request):
             plt.scatter(crime2[i, 0], crime2[i, 1], s=250, color=kcolors[i])
             plt.annotate(labels, (crime2[i, 0], crime2[i, 1]))
 
-        plt.xlabel('Principal Component 1')
-        plt.ylabel('Principal Component 2')
+        plt.xlabel('Composante principale 1')
+        plt.ylabel('Composante principale 2')
         plt.tight_layout()
 
     #creation of unique id for cluster result image
@@ -397,8 +446,17 @@ def clusterDistricts(request):
     #to avoid an error with plt
     plt.close('all')
     #regrouping paths in one dictionary
-    paths = {'pcaResult': pathPCAresult, 'clusterResult': pathClusterResult}
+    paths = {'pcaResult': pathPCAresult, 'clusterResult': pathClusterResult, 'numberClusters': pathOptimalNumberOfClusters}
 
-    return JsonResponse({'data': PCAtableJSON, 'types': types, 'paths': json.dumps(paths)})
+
+    #labels = json.dumps(kmesh.labels_)
+    #dic_labels = {}
+    #dic_labels['labels'] = kmesh.labels_
+    labels = pd.Series(kmesh.labels_).to_json(orient='values')
+    regions = json.dumps(sector)
+
+
+    return JsonResponse({'data': PCAtableJSON, 'types': types, 'paths': json.dumps(paths),
+                         'labels': labels, 'regions': regions})
 
 

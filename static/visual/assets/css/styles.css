@@ -713,8 +713,8 @@ ul.breadcrumbs {
             align-items: center;
     -ms-flex-wrap: wrap;
         flex-wrap: wrap;
-    background: -webkit-linear-gradient(left, #8914fe 0%, #8063f5 100%);
-    background: linear-gradient(to right, #8914fe 0%, #8063f5 100%);
+    background: -webkit-linear-gradient(left, #189f68 0%, #189f68 100%);
+    background: linear-gradient(to right, #189f68 0%, #189f68 100%);
     padding: 17px 38px;
     position: relative;
 }
@@ -1695,8 +1695,8 @@ table.dbkit-table tr td {
 }
 
 .gradiant-bg .card-header a {
-    background-image: -webkit-linear-gradient(top left, #8914fe, #8160f6);
-    background-image: linear-gradient(to bottom right, #8914fe, #8160f6);
+    background-image: -webkit-linear-gradient(top left, #37febd, rgba(57, 255, 206, 0.74));
+    background-image: linear-gradient(to bottom right, #189f68, #189f68);
     color: #fff;
 }
 
@@ -2314,7 +2314,7 @@ table.dataTable thead td {
 
 .login-form-head {
     text-align: center;
-    background: #8655FC;
+    background: #36333e;
     padding: 50px;
 }
 
