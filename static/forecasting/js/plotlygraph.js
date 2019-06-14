@@ -35,10 +35,10 @@ function forecastAll(records) {
   };
 
   for (i = 0; i < Object.size(records.forecast); i++) {
-    number2 = records.forecast[i].yhat;
+    number2 = Math.round(records.forecast[i].yhat);
+    console.log(number2);
     date2 = records.forecast[i].ds;
     x2.push(date2);
-    console.log(x2);
     y2.push(number2);
   }
 
@@ -54,13 +54,11 @@ function forecastAll(records) {
       size: 5,
       line: {
         color: "red",
-        width: 2
+        width: 1
       }
     }
   };
-
   var data = [trace1, trace2];
-
   var layout = {
     xaxis: {
       type: "date",
@@ -68,6 +66,5 @@ function forecastAll(records) {
     },
     title: "Le nombre de crimes par jour"
   };
-
   Plotly.newPlot("myDiv", data, layout, { showSendToCloud: false });
 }
