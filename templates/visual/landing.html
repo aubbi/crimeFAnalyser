@@ -41,7 +41,7 @@
                                 <div class="card-body">
                                     <h5 class="title">Prevision des crimes</h5>
                                     <a href="/predict/make/" class="btn btn-primary">Consulter</a>
-                                    <a href="#" class="btn btn-danger">Voir tutorial</a>
+                                    <a href="#" class="btn btn-danger" data-toggle="modal" onclick="setSource('adele')"  data-target=".bd-example-modal-lg1">Voir tutorial</a>
                                 </div>
                             </div>
                         </div>
@@ -53,11 +53,22 @@
                                     <p class="card-text">
                                     </p>
                                     <a href="/vis/home/" class="btn btn-primary">Consulter</a>
-                                    <a href="#" class="btn btn-danger">Voir tutorial</a>
+                                    <a href="#" class="btn btn-danger" data-toggle="modal" onclick="setSource('dashboard')"  data-target=".bd-example-modal-lg1">Voir tutorial</a>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+
+<div class="modal fade bd-example-modal-lg1" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <video width="800"  controls id="videoSource">
+      </video>
+    </div>
+  </div>
+</div>
+
 
 
 
@@ -67,3 +78,12 @@
 </body>
 
 </html>
+{% block scripts %}
+    <script>
+    function setSource(source) {
+        element = document.getElementById('videoSource')
+        element.innerHTML='';
+        element.innerHTML = '<source src="../../static/visual/assets/videos/'+source+'.mp4" type="video/mp4">';
+    }
+    </script>
+{% endblock %}
