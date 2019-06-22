@@ -22,6 +22,14 @@ listofCrimesGlobal = ['Agression', 'Violation de l ordre publique', 'Vol', 'Infr
                       'Harcelement', 'Agression sexuelle', 'Narcotique', 'Infraction sexuelle', 'Autre', 'Infraction d enfants', 'Kidnapping', 'Jeu d argent', 'Incendie volontaire',
                       'Violation des liee a l alcool', 'Obscenite', 'Non penal', 'indecence publique', 'Trafic humain', 'Violation de licence de trasport', 'Autre violation narcotique']
 
+listOfRegionsGlobal = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11',
+                       '12', '13', '14', '15', '16', '17', '18', '19', '20', '22', '24', '25', '31']
+
+listOfPlaceType = ['Appartement', 'Rue',
+                   'Vehicule', 'Autre', 'Parking', 'Ecoles', 'Hopital', 'Restaurant/Cafe/Bar', 'Magasin', 'Gare', 'Banque', 'Stades', 'Hotel', 'Usine',
+                   'Etablissement Etatique', 'Route', 'Lieu de culte', 'Aeroport', 'Rurale'
+                   ]
+
 
 # Create your views here.
 
@@ -31,7 +39,9 @@ def predictCrimes(request):
     type_Place = ['Appartement', 'Route', 'Etablissement', 'Local']
     motif = ['Revenge']
     context = {
-        'crimes': listofCrimesGlobal
+        'crimes': listofCrimesGlobal,
+        'regions': listOfRegionsGlobal,
+        'places': listOfPlaceType
     }
     return render(request, 'predict/forecast.html', context)
 
@@ -44,30 +54,30 @@ def makeForecast(request):
     os.mkdir('static/visual/images/graphs')
 
     types = request.POST.getlist('types[]')
+    regions = request.POST.getlist('regions[]')
+    places = request.POST.getlist('places[]')
     startDate = request.POST['startDate']
     endDate = request.POST['endDate']
-
-    period = 10
-
-    # Fetching post request variables
-
-    # growth = request.POST['endDate'] = request.POST['']
+    arrest = request.POST.getlist['arrest']
+    period = request.POST['period']
+    places = request.POST.getlist['places']
+    print(startDate)
+    # FbProphet parameters
+    linear = request.POST['']
+    logistic = request.POST['']
+    modeAdditif = request.POST['']
+    modeMultiplicatif = request.POST['']
+    valMax = request.POST['']
+    valMin = request.POST['']
+    ordreHebdomadaire = request.POST['']
+    ordreAnnuel = request.POST['']
+    changepointPriorScale = request.POST['']
+    seasonalityPriorScale = request.POST['']
     # holidays = request.POST.getlist('holidays[]')
-    # fourier_order_weekly = request.POST['fourier_order']
-    # fourier_order_yearly = request.POST['']
-    # seasonality_mode = request.POST['']
-    # seasonality_prior_scale = request.POST['']
-    # annual_seasonality = request.POST['']
-    # weekly_seasonality = request.POST['']
-    # daily_seasonality = request.POST['']
 
-    # arrest = request.POST['arrest']
-    # rawData = Crime.objects.filter(Date__range=[startDate, endDate], Arrest__in=arrest, Primary_Type__in=types).\
-    #     values('Date', 'Primary_Type').\
-    #     annotate(crimes_Count=Count('id')).order_by('Date')
-    df = pd.DataFrame(
-        list(Crime.objects.filter(Date__range=[startDate, endDate], Primary_Type__in=types).values()))
-    # df = pd.DataFrame(list(Crime.objects.all().values()))
+    # Filtering requested data
+    df = pd.DataFrame(list(Crime.objects.filter(
+        Date__range=[startDate, endDate], Primary_Type__in=types, District__in=regions, Arrest__in=arrest, Location_Description__in=places).values()))
     data = pd.DataFrame(df['Date'].value_counts(sort=False).reset_index())
     data.columns = ['ds', 'y']
     crimes = data.sort_values(by='ds')
@@ -78,6 +88,17 @@ def makeForecast(request):
     future = m.make_future_dataframe(periods=int(period))
     # making the forecast
     forecast = m.predict(future)
+
+    # Calculate RMSE and MAPE using 10% of the dataset as a testing dataset
+    train = data.iloc[:-len(data)*0.1, :]
+    train.index = pd.to_datetime(train.index)
+    test = data.iloc[-len(data)*0.1:, :]
+    test.index = pd.to_datetime(test.index)
+    # rmse
+    # sse1 = np.sqrt(np.mean(np.square(test.y.values - forecast.yhat)))
+    # # mape
+    # mape = np.mean(np.abs(forecast.yhat - test.y.values)/np.abs(test.y.values))
+
     #forecast['ds'] = forecast.ds.astype(str)
     # Plotting the trend and yearly trend, converting it to a picture
 

@@ -1,7 +1,8 @@
+from django.contrib import admin
 from django.db import models
 
-class Crime(models.Model):
 
+class Crime(models.Model):
     Case_Number = models.TextField(max_length=1000, default='')
     Date = models.DateField()
     Block = models.TextField(max_length=1000, default='null')
@@ -22,7 +23,17 @@ class Crime(models.Model):
     #Updated_on = models.DateTimeField()
     Latitude = models.FloatField(default=0)
     Longitude = models.FloatField(default=0)
+
+    def __str__(self):
+        ret = self.Case_Number + ',' + \
+            str(self.District) + ',' + self.Primary_Type + \
+            ',' + self.Location_Description
+        return ret
+
     class Meta:
         managed = True
         db_table = 'crimes_table'
 
+
+class CrimeAdmin(admin.ModelAdmin):
+    list_display = ('Case_Number', 'District')
