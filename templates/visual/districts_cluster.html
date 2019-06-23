@@ -17,7 +17,7 @@
                                                 {% csrf_token %}
                                                     <h4 class="header-title">Filtrage des données</h4>
                                                     <b class="text-muted mb-3 mt-4 d-block">Types de crimes</b>
-                                                    <input type="checkbox" onclick="toggle(this, 'types[]');" />Cochez toutes<br />
+                                                    <input type="checkbox" onclick="toggle(this, 'types[]');" />Cochez toutes<br/>
                                                     {% for crime in crimes  %}
                                                         <div class="custom-control custom-checkbox custom-control-inline">
                                                         <input type="checkbox" class="custom-control-input crimeBox" id="{{ crime }}" name="types[]" value="{{ crime }}">
