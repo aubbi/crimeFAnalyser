@@ -187,8 +187,7 @@
                     endDate: $("#endDate").val(),
                 },
                 success : function (response) {
-                    console.log(response['regions']);
-                    console.log(response['labels']);
+                    //console.log(response['labels']);
                     var element  = document.getElementById('pca_result');
                     var element1  = document.getElementById('image_result');
                     var elementX  = document.getElementById('numberClusters');
@@ -218,7 +217,8 @@
                     var table =document.getElementById('table-body');
                     table.innerHTML = html;
                     document.getElementById('parent').innerHTML = '<div id="map-clusters" style="width: 100%; height: 500px"></div>'
-                    makeMapForClustering(response['regions'], response['regions'], $("#clusters").val());
+                    makeMapForClustering(response['regions'], response['labels'], $("#clusters").val(), response['colors'],JSON.parse(response['regionsColord']));
+                    //console.log(JSON.parse(response['regionsColord']))
                 },
                 error : function (msg) {
                     alert('no response');
