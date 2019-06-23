@@ -10,7 +10,7 @@ from users.models import Settings
 
 admin.site.site_header = 'Administration de CrimeAnalyzer'
 
-admin.site.register(Crime)
+#admin.site.register(Crime)
 admin.site.register(Settings)
 
 @admin.register(Crime)

@@ -480,7 +480,6 @@ def clusterDistricts(request):
         print(i)
         districtsColorsDic[sector[i]] = colors[labels_before[i]]
 
-    print(districtsColorsDic)
 
     return JsonResponse({'data': PCAtableJSON, 'types': types, 'paths': json.dumps(paths),
                          'labels': labels, 'regions': regions, 'colors': colors, 'regionsColord': json.dumps(districtsColorsDic) })

@@ -575,7 +575,7 @@ function makeMapForClustering(regions, labels, k, colors, coloredDistricts){
 
      );
     geoJsonLayer.addTo(mapForClusters);
-
+    //kkjkjkj
     L.GeoJSON.AJAX("/static/visual/bNew.geojson",{
         onEachFeature: onEachFeature
     }).addTo(mapForClusters);
