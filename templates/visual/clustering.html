@@ -1,5 +1,5 @@
 {% extends 'visual/base.html' %}
-
+{% block page_name %} Clustering des crimes(types) {% endblock %}
 {% block content %}
                 <!-- MAIN CONTENT GOES HERE -->
                 <div class="row">
@@ -15,6 +15,42 @@
                                             <div class="card-body">
                                                 <form action="{% url 'kmeans'  %}" method="post" id="filter_form">
                                                 {% csrf_token %}
+                                                    <b class="text-muted mb-3 mt-4 d-block">Choix des regions</b>
+                                                    <input type="checkbox" onclick="toggle(this, 'regions[]');" />Cochez toutes<br />
+                                                    {% for region in regions  %}
+                                                        <div class="custom-control custom-checkbox custom-control-inline">
+                                                        <input type="checkbox" class="custom-control-input regionBox" id="{{ region }}" name="regions[]" value="{{ region }}">
+                                                        <label class="custom-control-label" for="{{ region }}">{{ region }}</label>
+                                                    </div>
+                                                    {% endfor %}
+
+                                                <div class="form-row">
+                                                <div class="col-md-4 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="start_date" class="col-form-label">Date début</label>
+                                                        <input class="form-control" name="startDate" type="date" value="2016-01-05" id="start_date">
+                                                     </div>
+                                                </div>
+                                                <div class="col-md-4 mb-3">
+                                                    <div class="form-group">
+                                                        <label for="end_date" class="col-form-label">Date fin</label>
+                                                        <input class="form-control" name="endDate" type="date" value="2016-03-05" id="end_date">
+                                                     </div>
+                                                </div>
+                                                <div class="col-md-4 mb-3">
+                                                    <label for="end_date" class="col-form-label">Arrestation</label>
+                                                    <div class="form-group">
+                                                        <div class="custom-control custom-checkbox custom-control-inline">
+                                                            <input type="checkbox" class="custom-control-input arrest" id="true" name="arrest[]" value="1">
+                                                            <label class="custom-control-label" for="true">Oui</label>
+                                                        </div>
+                                                        <div class="custom-control custom-checkbox custom-control-inline">
+                                                            <input type="checkbox" class="custom-control-input arrest" id="false" name="arrest[]" value="0">
+                                                            <label class="custom-control-label" for="false">Non</label>
+                                                        </div>
+                                                     </div>
+                                                </div>
+                                            </div>
                                                     <h4 class="header-title">Kmeans</h4>
                                                     <div class="form-row">
                                                         <div class="col-md-4 mb-3">
@@ -122,11 +158,23 @@
         $(document).on('submit', '#filter_form', function(e){
 
             e.preventDefault();
+            var arrest = [];
+            $(".arrest:checked").each(function () {
+                arrest.push(this.value)
+            });
+            var regions = [];
+            $(".regionBox:checked").each(function () {
+                regions.push(this.value)
+            });
             $.ajax({
                 headers: { "X-CSRFToken": token },
                 type:'POST',
                 url:'../makeKmeans',
                 data:{
+                    regions: regions,
+                    startDate: $("#start_date").val(),
+                    endDate: $("#end_date").val(),
+                    arrest: arrest,
                     numberClusters: $("#clusters").val(),
                     numberEssais : $("#essais").val(),
                     numberIterations: $("#iterations").val(),

@@ -4,10 +4,14 @@ from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import ugettext_lazy as _
 
 # Register your models here.
+
 from .models import Crime
+from users.models import Settings
 
 admin.site.site_header = 'Administration de CrimeAnalyzer'
 
+#admin.site.register(Crime)
+admin.site.register(Settings)
 
 @admin.register(Crime)
 class CrimeAdmin(admin.ModelAdmin):

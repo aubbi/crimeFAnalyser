@@ -78,7 +78,12 @@ def showMap(request):
 
 @login_required
 def cluster(request):
-    return render(request,'visual/clustering.html')
+    listOfRegions = listOfRegionsGlobal
+    context = {
+
+        'regions': listOfRegions,
+    }
+    return render(request,'visual/clustering.html', context)
 
 def cluster_district(request):
     listOfCrimes = listofCrimesGlobal
@@ -240,8 +245,17 @@ def default(request):
     print(dateSelected, typesSelected)
     return HttpResponse(getDataPerYear(dateSelected,typesSelected))
 
+from users.models import Settings
+from django.contrib.auth.models import User
+
 def defaultHome(request):
-    rawData = Crime.objects.filter(Date__range=['2016-01-01', '2016-12-31']).order_by('Date')[:20000]
+
+    #userLogged = request.user
+    #limit = Settings.objects.filter(user=userLogged).values('limit')
+    #settings = User.objects.get(username=request.user).Settings
+    s = User.objects.select_related("settings").get(username=request.user).settings
+    print(s.limit)
+    rawData = Crime.objects.filter(Date__range=['2016-01-01', '2016-12-31']).order_by('Date')[:s.limit]
     result = []
     for i in rawData.values():
         i['Date'] = i['Date'].strftime('%m/%d/%Y')
@@ -259,15 +273,18 @@ def customeHome(request):
         result.append(i)
     return HttpResponse(json.dumps(result))
 
-
+#makeClustering for crimes
 def makeKmeans(request):
-
+    startDate = request.POST['startDate']
+    endDate = request.POST['endDate']
+    regions = request.POST.getlist('regions[]')
+    arrest = request.POST.getlist('arrest[]')
     numberCluster = request.POST['numberClusters']
     numberTests = request.POST['numberEssais']
     numberIterations = request.POST['numberIterations']
     numberClustersHi = request.POST['numberClustersHi']
 
-    df1 = pd.DataFrame(list(Crime.objects.all().values('Primary_Type')
+    df1 = pd.DataFrame(list(Crime.objects.filter(Date__range=[startDate, endDate], Arrest__in=arrest, District__in=regions).values('Primary_Type')
                             .annotate(count=Count('id'))))
 
     allTypes = df1['Primary_Type'].unique()
@@ -453,10 +470,18 @@ def clusterDistricts(request):
     #dic_labels = {}
     #dic_labels['labels'] = kmesh.labels_
     labels = pd.Series(kmesh.labels_).to_json(orient='values')
+    labels_before = list(pd.Series(kmesh.labels_))
     regions = json.dumps(sector)
+
+    #associate each region with its color
+    districtsColorsDic = {}
+
+    for i in range(len(sector)):
+        print(i)
+        districtsColorsDic[sector[i]] = colors[labels_before[i]]
 
 
     return JsonResponse({'data': PCAtableJSON, 'types': types, 'paths': json.dumps(paths),
-                         'labels': labels, 'regions': regions})
+                         'labels': labels, 'regions': regions, 'colors': colors, 'regionsColord': json.dumps(districtsColorsDic) })
 
 

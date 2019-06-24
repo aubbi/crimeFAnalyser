@@ -68,12 +68,13 @@ function makeGraphs(records) {
 
 
     //Charts
+    var crimeMap = dc.leafletMarkerChart("#map2");
     var numberRecordsND = dc.numberDisplay("#number-records");
     var timeChart = dc.lineChart("#time-chart");
     //var arrestChart = dc.rowChart("#arrest");
     var arrestChart = dc.pieChart("#arrest");
     var crimeTypeChart = dc.rowChart("#crime-type");
-    var crimeMap = dc.leafletMarkerChart("#map2");
+
     var topCrimes = dc.pieChart("#top-crimes");
     var dayOfWeekChart = dc.rowChart('#day-of-week-chart');
     var districtsChart = dc.barChart("#district-chart");
@@ -132,6 +133,24 @@ function makeGraphs(records) {
     });*/
 
   //var adjustX = 20, adjustY = 40;
+
+
+    crimeMap
+        .dimension(geoDim)
+        .group(geoGroup)
+        .center([41.8781,-87.6298])
+        .zoom(9)
+        .valueAccessor(d => d.value['Date']
+                    +", Type:"+d.value['Primary_Type']
+                    +", Arrest : "+ d.value['Arrest']
+                    +", Description du lieu:  "+ d.value['Location_Description']
+                    +", Numero du cas:  "+ d.value['Case_Number']
+                    +", Code penal:  "+ d.value['Code_Penal'])
+        .fitOnRender(true)
+        .fitOnRedraw(true)
+        .cluster(true)
+        //.filterByArea(true)
+        .brushOn(false);
 
    arrestChart
         .width(200)
@@ -193,22 +212,7 @@ function makeGraphs(records) {
         .outerPadding(0.05)
         .group(districtGroup);
 
-    crimeMap
-        .dimension(geoDim)
-        .group(geoGroup)
-        .center([41.8781,-87.6298])
-        .zoom(9)
-        .valueAccessor(d => d.value['Date']
-                    +", Type:"+d.value['Primary_Type']
-                    +", Arrest : "+ d.value['Arrest']
-                    +", Description du lieu:  "+ d.value['Location_Description']
-                    +", Numero du cas:  "+ d.value['Case_Number']
-                    +", Code penal:  "+ d.value['Code_Penal'])
-        .fitOnRender(false)
-        .fitOnRedraw(false)
-        .cluster(true)
-        .filterByArea(true)
-        .brushOn(false);
+
 
     dayOfWeekChart
         .height(250)
@@ -227,7 +231,12 @@ function makeGraphs(records) {
 				maxZoom: 15,
 			}).addTo(map);
 
-
+         var printer = L.easyPrint({
+      		title:'this is a title',
+      		sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
+      		filename: 'heatMap',
+      		exportOnly: true,
+		}).addTo(map);
 
         //HeatMap
         var geoData = [];
@@ -241,12 +250,7 @@ function makeGraphs(records) {
             maxZoom: 1,
         }).addTo(map);
 
-        var printer = L.easyPrint({
-      		title:'this is a title',
-      		sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
-      		filename: 'heatMap',
-      		exportOnly: true,
-		}).addTo(map);
+
 
 
         /*var normalMap = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -518,19 +522,27 @@ function getRandomColor() {
     return color;
 }
 
+function onEachFeature(feature, layer) {
+    layer.bindPopup(feature.properties.dist_label)
+}
 
-function makeMapForClustering(regions, labels, k){
+
+function makeMapForClustering(regions, labels, k, colors, coloredDistricts){
+    console.log("labels : "+labels);
+
+    correctOrder = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 22, 24, 25, 31]
 
     var container = L.DomUtil.get('map-clusters');
       if(container != null){
         container._leaflet_id = null;
       }
 
-    colors = [];
+    colors1 = [];
     for(var i=0; i<k;i++){
-        colors[i] = getRandomColor();
+        colors1[i] = getRandomColor();
     }
 
+    //console.log('colrsss'+ colors1);
 
     mapForClusters = L.map('map-clusters');
     //if(heatMap != undefined || heatMap != null)
@@ -542,31 +554,32 @@ function makeMapForClustering(regions, labels, k){
       		exportOnly: true,
 		}).addTo(mapForClusters);
 
-     var geoJsonLayer = new L.GeoJSON.AJAX("/static/visual/b.geojson",
+     var geoJsonLayer = new L.GeoJSON.AJAX("/static/visual/bNew.geojson",
          {
          style: function (feature) {
              var district = feature.properties.dist_num;
-             var index = regions.indexOf(parseInt(district));
+             console.log(district);
+             var index = correctOrder.indexOf(parseInt(district));
              if(index !== -1){
-                 var cluster = labels[index];
-                //console.log(district, index, cluster, colors[cluster]);
                 return {
                 radius: 8,
-				fillColor: colors[cluster],
-				color: "#000",
-				weight: 1,
+				fillColor: coloredDistricts[district],
+				color: "#000000",
+				weight: 2,
 				opacity: 1,
+                dashArray: '3',
 				fillOpacity: 0.8}
              }else return {fillColor: "#ff7800"}
 
-         }},
-         {
-            onEachFeature: forEachFeature
-         },
+         }}
+
      );
+    geoJsonLayer.addTo(mapForClusters);
+    //kkjkjkj
+    L.GeoJSON.AJAX("/static/visual/bNew.geojson",{
+        onEachFeature: onEachFeature
+    }).addTo(mapForClusters);
 
-
-     geoJsonLayer.addTo(mapForClusters);
 
         mapForClusters.setView([41.8781,-87.6298],10);
         mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
@@ -578,18 +591,6 @@ function makeMapForClustering(regions, labels, k){
 
 
 }
-
-
-function forEachFeature(feature, layer) {
-		var popupContent = "'<h1>'+ feature.properties.dist_num+'</h1>'";
-		console.log(popupContent);
-
-		if (feature.properties && feature.properties.popupContent) {
-			popupContent += feature.properties.popupContent;
-		}
-
-		layer.bindPopup(popupContent);
-	};
 
 
 
@@ -793,6 +794,7 @@ function allDataGraphs(records) {
 
 };
 
+//test to do another visualisation trick
 function makeSomething(records) {
 
     var parseTime = d3.timeParse("%Y-%m-%d");
