@@ -45,6 +45,21 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
 ]
 
+
+from django.conf import settings
+from django.utils import translation
+
+
+class AdminLocaleURLMiddleware:
+
+    def process_request(self, request):
+        if request.path.startswith('/admin'):
+            request.LANG = getattr(
+                settings, 'ADMIN_LANGUAGE_CODE', settings.LANGUAGE_CODE)
+            translation.activate(request.LANG)
+            request.LANGUAGE_CODE = request.LANG
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -54,7 +69,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-
 ]
 
 ROOT_URLCONF = 'crimeForcast.urls'

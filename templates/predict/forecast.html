@@ -171,9 +171,9 @@
                 <div class="col-md-4 mb-3">
                   <div class="form-group">
                     <label for="end_date" class="col-form-label">Echelle à priori de saisonnalité</label>
-                    <input class="form-control" name="seasonalityPriorScale" required id="priorScale" type="numbre" value="10">
+                    <input class="form-control" name="seasonalityPriorScale" required id="seasonalityPriorScale" type="numbre" value="10">
                     <label for="end_date" class="col-form-label">Echelle à priori de changements</label>
-                    <input class="form-control" name="changepointPriorScale" required id="priorScale" type="numbre" value="10">
+                    <input class="form-control" name="changepointPriorScale" required id="changepointPriorScale" type="numbre" value="10">
                   </div>
                 </div>
             </div>
@@ -196,10 +196,10 @@
           <div class="card-body" style="padding: 30px;">
             <h4>1. Analyse de la criminalité dans le temps</h4>
             <div class="row">
-              <div style="height: 600px; width: 100%" id="chartdiv"></div>
+              <div style="height: 600px; width: 100%" id="forecast"></div>
             </div>
             <div class="row">
-                <div style="height: 600px; width: 100%" id="chartdivWeekly"></div>
+                <div style="height: 600px; width: 100%" id="components"></div>
             </div>
             <div class="row">
                 <div style="height: 600px; width: 100%" id="chartdivYearly"></div>
@@ -239,7 +239,7 @@
 
   </div>
 
-  <div class="modal">
+  <div class="modal1">
     <!-- Place at bottom of page -->
   </div>
 
@@ -260,7 +260,10 @@
     $(document).on('submit', '#forecast_form', function (e) {
 
       if (document.getElementById('image1')) {
-        document.getElementById('image1');
+        document.getElementById('image1').remove();
+      };
+      if (document.getElementById('image2')) {
+        document.getElementById('image2').remove();
       };
       e.preventDefault();
       var crimesSelected = [];
@@ -287,27 +290,38 @@
           period: $("#period").val(),
           types: crimesSelected,
           regions: regions,
+          places: places, 
           arrest: arrest,
-          startDate: $("#start_date").val(),
-          endDate: $("#end_date").val(),
+          startDate: $("#startDate").val(),
+          endDate: $("#endDate").val(),
           // values of Prophet parameters
           linear: $("#linear").val(),
           logistic: $("#logistic").val(),
           modeAdditif: $("#modeAdditif").val(),
-          modeMultiplicatif: $("modeMultiplicatif"),
-          valMax: $("valMax").val(),
-          valMin: $("valMin").val(),
-          ordreHebdomadaire: $("ordreHebdomadaire").val(),
-          ordreAnnuel: $("ordreAnnuel").val(),
-          seasonalityPriorScale: $("priorScale").val(),
-          changepointPriorScale: $("changepointPriorScale").val()
+          modeMultiplicatif: $("#modeMultiplicatif").val(),
+          valMax: $("#valMax").val(),
+          valMin: $("#valMin").val(),
+          ordreHebdomadaire: $("#ordreHebdomadaire").val(),
+          ordreAnnuel: $("#ordreAnnuel").val(),
+          seasonalityPriorScale: $("#seasonalityPriorScale").val(),
+          changepointPriorScale: $("#changepointPriorScale").val()
         },
         success: function (result) {
+          console.log("ah shit")
           // var element1  = document.getElementById('chartdivYearly');
           // console.log("i am here");
           //forecastChart(result);
           forecastAll(result);
           console.log(result);
+
+          paths = JSON.parse(result['paths']);
+
+          var element = document.getElementById('forecast');
+          var element1 = document.getElementById('components');
+
+          element.innerHTML = '<image id="image1" src="../../' + paths['path_forecast'] + '">';
+          element1.innerHTML = '<image style="height: 500px;" id="image2" src="../../' + paths['path_components'] + '">';
+
           //element.innerHTML = '<image id="image1" src="../../'+paths['pathForecast']+'">';
         },
         error: function (msg) {
