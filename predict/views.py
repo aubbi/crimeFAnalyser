@@ -10,6 +10,12 @@ import numpy as np
 import pandas as pd
 from pandas import Series
 from matplotlib import pyplot
+
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
+
+
 from fbprophet import Prophet
 import datetime
 from visual.models import Crime
@@ -48,32 +54,34 @@ def predictCrimes(request):
 
 def makeForecast(request):
 
-    # remove the directory to clear the files
-    shutil.rmtree('static/visual/images/graphs')
-    # recreate the folder
-    os.mkdir('static/visual/images/graphs')
+    # # remove the directory to clear the files
+    shutil.rmtree('static/visual/images/forecast')
+    # # recreate the folder
+    os.mkdir('static/visual/images/forecast')
 
     types = request.POST.getlist('types[]')
     regions = request.POST.getlist('regions[]')
     places = request.POST.getlist('places[]')
     startDate = request.POST['startDate']
     endDate = request.POST['endDate']
-    arrest = request.POST.getlist['arrest']
+    arrest = request.POST.getlist('arrest[]')
     period = request.POST['period']
-    places = request.POST.getlist['places']
-    print(startDate)
+    places = request.POST.getlist('places[]')
     # FbProphet parameters
-    linear = request.POST['']
-    logistic = request.POST['']
-    modeAdditif = request.POST['']
-    modeMultiplicatif = request.POST['']
-    valMax = request.POST['']
-    valMin = request.POST['']
-    ordreHebdomadaire = request.POST['']
-    ordreAnnuel = request.POST['']
-    changepointPriorScale = request.POST['']
-    seasonalityPriorScale = request.POST['']
+    linear = request.POST['linear']
+    logistic = request.POST['logistic']
+    modeAdditif = request.POST['modeAdditif']
+    modeMultiplicatif = request.POST['modeMultiplicatif']
+    valMax = request.POST['valMax']
+    valMin = request.POST['valMin']
+    ordreHebdomadaire = request.POST['ordreHebdomadaire']
+    ordreAnnuel = request.POST['ordreAnnuel']
+    changepointPriorScale = request.POST['changepointPriorScale']
+    seasonalityPriorScale = request.POST['seasonalityPriorScale']
+
     # holidays = request.POST.getlist('holidays[]')
+
+    estimations = request.POST.getlist('estimations[]')
 
     # Filtering requested data
     df = pd.DataFrame(list(Crime.objects.filter(
@@ -83,64 +91,45 @@ def makeForecast(request):
     crimes = data.sort_values(by='ds')
     crimes.reset_index(inplace=True)
     crimes['ds'] = crimes.ds.astype(str)
-    m = Prophet()
+
+    m = Prophet(n_changepoints=25, changepoint_range=0.8,
+                yearly_seasonality='none', seasonality_mode='additive', seasonality_prior_scale=seasonalityPriorScale,
+                changepoint_prior_scale=changepointPriorScale, weekly_seasonality=False, yearly_seasonality=False).add_seasonality(name="weekly", period=7, fourier_order=ordreHebdomadaire)
+
     m.fit(crimes)
     future = m.make_future_dataframe(periods=int(period))
     # making the forecast
     forecast = m.predict(future)
 
+    # train = crimes.iloc[:-size, :]
+    # test = crimes.iloc[-size:, :]
+    # forecast_extract = forecast.iloc[size*0.9:size, ]
+    # print(forecast_extract)
+    # print(test)
+    # print(len(test))
+    # print(len(forecast_extract))
+
+    path_components = 'static/visual/images/forecast/Prophet_Components' + \
+        str(uuid.uuid4()) + '.png'
+    m.plot_components(forecast).savefig(path_components)
+
+    paths = {'path_components': path_components}
+
+    print(pd.merge(forecast, crimes, on='ds', how='inner'))
+
     # Calculate RMSE and MAPE using 10% of the dataset as a testing dataset
-    train = data.iloc[:-len(data)*0.1, :]
-    train.index = pd.to_datetime(train.index)
-    test = data.iloc[-len(data)*0.1:, :]
-    test.index = pd.to_datetime(test.index)
-    # rmse
-    # sse1 = np.sqrt(np.mean(np.square(test.y.values - forecast.yhat)))
-    # # mape
-    # mape = np.mean(np.abs(forecast.yhat - test.y.values)/np.abs(test.y.values))
+    size = len(crimes)
+    test = forecast.iloc[-size:, :]
+    rmse = np.sqrt(np.mean(np.square(test.yhat - crimes.y)))
+    mape = np.mean(np.abs(test.yhat - crimes.y)/np.abs(crimes.y))
 
-    #forecast['ds'] = forecast.ds.astype(str)
-    # Plotting the trend and yearly trend, converting it to a picture
-
-    # days = (pd.date_range(start='2017-01-01', periods=365) + pd.Timedelta(days=0))
-    # df_y = m.seasonality_plot_df(days)
-    # seas = m.predict_seasonal_components(df_y)
-
-    # fig,ax = plt.subplots(2, 1, figsize=(14,8))
-    # ax[0].plot(forecast['ds'].dt.to_pydatetime(), forecast['trend'])
-    # ax[0].grid(alpha=0.5)
-    # ax[0].set_xlabel('Années')
-    # ax[0].set_ylabel('Tendance')
-    # ax[1].set_ylabel('trend')
-    # ax[1].plot(df_y['ds'].dt.to_pydatetime(), seas['yearly'], ls='-', c='#0072B2')
-    # ax[1].set_xlabel('Day of year')
-    # ax[1].set_ylabel('yearly')
-    # ax[1].grid(alpha=0.5)
-
-    # ax[1].plot(df_y['ds'].dt.to_pydatetime(), seas['yearly'], ls='-', c='#0072B2')
-    # ax[1].set_xlabel('Day of year')
-    # ax[1].set_ylabel('yearly')
-    # ax[1].grid(alpha=0.5)
-
-    # pathForecast = 'static/visual/images/graphs/forecast' + str(uuid.uuid4()) + '.png'
-    # plt.savefig(pathForecast)
-    # #to avoid an error with plt
-    # plt.close('all')
-    # #regrouping paths in one dictionary
-    # paths = {'pathForecast': pathForecast}
+    metriques = {'rmse': rmse, 'mape': mape}
 
     # return json content for our crimes data and forecast
     crimes = crimes.to_dict(orient='records')
     forecast = forecast.to_dict(orient='records')
 
-    # , 'paths': json.dumps(paths)
-
-    return JsonResponse({'crimes': crimes, 'forecast': forecast})
-
-
-def makeOtherForecasts(request):
-
-    return JsonResponse({'crimes': 1})
+    return JsonResponse({'crimes': crimes, 'forecast': forecast, 'paths': json.dumps(paths), 'metriques': json.dumps(metriques)})
 
 
 def showInstructions(request):
