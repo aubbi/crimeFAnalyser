@@ -8,11 +8,11 @@
     <p class="lead">Pour une utilisation efficace de la fonctionnalité de prédiction, veuillez suivre les étapes
       suivantes:</p>
     <hr class="my-4">
-    <p>1 => Filtrer selon ce que vous voulez vos prédictions (Historique/Période de prévision/Type d'infraction/Région/Type de lieu)
+    <p>1 => Filtrer les données
     </p>
-    <p>2 => Paramétrez le modèle selon le données (Lire la partie Instruction pour plus de détails)</p>
-    <p>3 => Cliquez sur: Prévoir la criminalité</p>
-    <p>4 => Analyser et sauvegarder les résultats</p>
+    <p>2 => Paramétrez le modèle  (Lire la partie Instruction pour plus de détails)</p>
+    <p>3 => Appliquer le modèle de prédiction</p>
+    <p>4 => Visualiser les résultats</p>
   </div>
 
 
@@ -115,7 +115,7 @@
             <div style="padding: 30px;" id="prophet" style="display: block;">
                 {% csrf_token %}
                 <h4 class="header-title">Croissance</h4>
-                <div class="form-row">
+                <div class="form-row col-md-6 col-lg-6">
                   <b class="text-muted col-md-4 mb-3 mb-3 d-block">Mode de croissance</b>
                   <br>
                   <div class=" col-md-4 mb-3 custom-control custom-radio">
@@ -130,18 +130,18 @@
                   <div class="col-md-4 mb-3">
                     <div class="form-group">
                       <label for="end_date" class="col-form-label">Valeur min </label>
-                      <input class="form-control" name="valMin" value="0" id="valMin" type="number">
+                      <input class="form-control" name="valMin" value="0" min="0" id="valMin" type="number">
                     </div>
                   </div>
                   <div class="col-md-4 mb-3">
                     <div class="form-group">
                       <label for="end_date" class="col-form-label">Valeur max </label>
-                      <input class="form-control" name="valMax" value="1000" id="valMax" type="number">
+                      <input class="form-control" name="valMax" value="1000" min="0" id="valMax" type="number">
                     </div>
                   </div>
                 </div>
                 <h4 class="header-title">Saisonnalité</h4>
-                <div class="form-row">
+                <div class="form-row col-md-6 col-lg-6">
                   <b class="text-muted col-md-4 mb-3 mb-3 d-block">Mode saisonnalité</b>
                   <br>
                   <div class=" col-md-4 mb-3 custom-control custom-radio">
@@ -157,29 +157,25 @@
                   <div class="col-md-4 mb-3">
                     <div class="form-group">
                       <label for="end_date" class="col-form-label">Ordre hebdomadaire </label>
-                      <input class="form-control" name="ordreHebdomadaire" value="5" id="ordreHebdomadaire"
+                      <input class="form-control" name="ordreHebdomadaire" min="0" value="5" id="ordreHebdomadaire"
                         type="number">
                     </div>
                   </div>
                   <div class="col-md-4 mb-3">
                     <div class="form-group">
-                      <label for="end_date" class="col-form-label">Ordre annuel </label>
-                      <input class="form-control" name="ordreAnnuel" value="10" id="ordreAnnuel" type="number">
+                      <label for="end_date" class="col-form-label">Ordre annuel</label>
+                      <input class="form-control" name="ordreAnnuel" value="10" min="0" id="ordreAnnuel" type="number">
                     </div>
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
                   <div class="form-group">
                     <label for="end_date" class="col-form-label">Echelle à priori de saisonnalité</label>
-                    <input class="form-control" name="seasonalityPriorScale" required id="seasonalityPriorScale" type="numbre" value="10">
+                    <input class="form-control" name="seasonalityPriorScale" min="0" required id="seasonalityPriorScale" type="numbre" value="10">
                     <label for="end_date" class="col-form-label">Echelle à priori de changements</label>
-                    <input class="form-control" name="changepointPriorScale" required id="changepointPriorScale" type="numbre" value="10">
+                    <input class="form-control" name="changepointPriorScale" min="0" required id="changepointPriorScale" type="numbre" value="10">
                   </div>
                 </div>
-            </div>
-            <h4 class="header-title">Liste des jours fériés</h4>
-            <div class="form-row">
-              <input type="text" class="form-control date" placeholder="Choisissez des dates ">
             </div>
             <button type="submit" class="btn btn-primary btn-lg btn-block">Calculer</button>
             </form>
@@ -194,49 +190,22 @@
         </div>
         <div id="accordion54" class="collapse" data-parent="#accordion5">
           <div class="card-body" style="padding: 30px;">
-            <h4>1. Analyse de la criminalité dans le temps</h4>
+            <h4>1. Prévision de la criminalité</h4>
             <div class="row">
-              <div style="height: 600px; width: 100%" id="forecast"></div>
+              <div style="height: 600px; width: 1000px;" id="myDiv"></div>
             </div>
             <div class="row">
-                <div style="height: 600px; width: 100%" id="components"></div>
+                <div style="height: 600px; width: 1000px; vertical-align:middle;" id="components"></div>
             </div>
-            <div class="row">
-                <div style="height: 600px; width: 100%" id="chartdivYearly"></div>
-            </div> -->
-            <br><br>
-
-            <h4>2. Prévision de la criminalité</h4>
-
-            <div class="row">
-              <div style="height: 600px; width: 1000%;" id="myDiv"></div>
-            </div>
-            <h4>3. Evaluation du modèle</h4>
-            <div class="row">
-
-              <table class="table table-hover table-dark">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">RMSE</th>
-                    <th scope="col">MAPE</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">1</th>
-                    <th scope="row">1423.23</th>
-                    <th scope="row">15.2</th>
-                  </tr>
-                </tbody>
-              </table>
+            <h4>2. Evaluation du modèle</h4>
+            <div id="results" class="row">
+              
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-
   </div>
 
   <div class="modal1">
@@ -261,9 +230,6 @@
 
       if (document.getElementById('image1')) {
         document.getElementById('image1').remove();
-      };
-      if (document.getElementById('image2')) {
-        document.getElementById('image2').remove();
       };
       e.preventDefault();
       var crimesSelected = [];
@@ -312,17 +278,13 @@
           // console.log("i am here");
           //forecastChart(result);
           forecastAll(result);
-          console.log(result);
-
           paths = JSON.parse(result['paths']);
-
-          var element = document.getElementById('forecast');
+          metriques = JSON.parse(result['metriques']);
+          console.log(metriques);
           var element1 = document.getElementById('components');
-
-          element.innerHTML = '<image id="image1" src="../../' + paths['path_forecast'] + '">';
-          element1.innerHTML = '<image style="height: 500px;" id="image2" src="../../' + paths['path_components'] + '">';
-
-          //element.innerHTML = '<image id="image1" src="../../'+paths['pathForecast']+'">';
+          var element = document.getElementById('results');
+          element1.innerHTML = '<image style="height: 600px;" id="image1" src="../../' + paths['path_components'] + '">';
+          element.innerHTML = '<h2>'+ metriques['rmse'] + '</h2><h2>' + metriques['mape'] + '</h2>';
         },
         error: function (msg) {
           alert('no response');
@@ -331,9 +293,10 @@
     });
 
     $('.date').datepicker({
-      multidate: true,
-      format: 'dd-mm-yyyy'
-    });
+        multidate: true,
+        format: 'dd-mm-yyyy'
+      });
+
   </script>
 
 

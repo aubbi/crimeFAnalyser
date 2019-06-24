@@ -10,6 +10,12 @@ import numpy as np
 import pandas as pd
 from pandas import Series
 from matplotlib import pyplot
+
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
+
+
 from fbprophet import Prophet
 import datetime
 from visual.models import Crime
@@ -75,6 +81,8 @@ def makeForecast(request):
 
     # holidays = request.POST.getlist('holidays[]')
 
+    estimations = request.POST.getlist('estimations[]')
+
     # Filtering requested data
     df = pd.DataFrame(list(Crime.objects.filter(
         Date__range=[startDate, endDate], Primary_Type__in=types, District__in=regions, Arrest__in=arrest, Location_Description__in=places).values()))
@@ -84,13 +92,15 @@ def makeForecast(request):
     crimes.reset_index(inplace=True)
     crimes['ds'] = crimes.ds.astype(str)
 
-    m = Prophet()
+    m = Prophet(n_changepoints=25, changepoint_range=0.8,
+                yearly_seasonality='none', seasonality_mode='additive', seasonality_prior_scale=seasonalityPriorScale,
+                changepoint_prior_scale=changepointPriorScale, weekly_seasonality=False, yearly_seasonality=False).add_seasonality(name="weekly", period=7, fourier_order=ordreHebdomadaire)
+
     m.fit(crimes)
     future = m.make_future_dataframe(periods=int(period))
     # making the forecast
     forecast = m.predict(future)
 
-    # size = round(len(crimes))
     # train = crimes.iloc[:-size, :]
     # test = crimes.iloc[-size:, :]
     # forecast_extract = forecast.iloc[size*0.9:size, ]
@@ -98,31 +108,28 @@ def makeForecast(request):
     # print(test)
     # print(len(test))
     # print(len(forecast_extract))
-    # Calculate RMSE and MAPE using 10% of the dataset as a testing dataset
 
-    # Plotting the forecast
-    path_forecast = 'static/visual/images/forecast/Prophet_Forecast' + \
-        str(uuid.uuid4()) + '.png'
-    m.plot(forecast).savefig(path_forecast)
     path_components = 'static/visual/images/forecast/Prophet_Components' + \
         str(uuid.uuid4()) + '.png'
     m.plot_components(forecast).savefig(path_components)
-    # rmse = np.sqrt(np.mean(np.square(test.y.values - forecast.yhat)))
-    # mape = np.mean(np.abs(forecast.yhat - test.y.values)/np.abs(test.y.values))
 
-    paths = {'path_forecast': path_forecast,
-             'path_components': path_components}
+    paths = {'path_components': path_components}
+
+    print(pd.merge(forecast, crimes, on='ds', how='inner'))
+
+    # Calculate RMSE and MAPE using 10% of the dataset as a testing dataset
+    size = len(crimes)
+    test = forecast.iloc[-size:, :]
+    rmse = np.sqrt(np.mean(np.square(test.yhat - crimes.y)))
+    mape = np.mean(np.abs(test.yhat - crimes.y)/np.abs(crimes.y))
+
+    metriques = {'rmse': rmse, 'mape': mape}
 
     # return json content for our crimes data and forecast
     crimes = crimes.to_dict(orient='records')
     forecast = forecast.to_dict(orient='records')
 
-    return JsonResponse({'crimes': crimes, 'forecast': forecast, 'paths': json.dumps(paths)})
-
-
-def makeOtherForecasts(request):
-
-    return JsonResponse({'crimes': 1})
+    return JsonResponse({'crimes': crimes, 'forecast': forecast, 'paths': json.dumps(paths), 'metriques': json.dumps(metriques)})
 
 
 def showInstructions(request):
