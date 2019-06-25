@@ -150,7 +150,22 @@ function makeGraphs(records) {
         .fitOnRedraw(true)
         .cluster(true)
         //.filterByArea(true)
-        .brushOn(false);
+        .brushOn(false)
+        .tiles(function (map) {
+
+             L.tileLayer(
+                'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; ' + mapLink + ' Contributors',
+				maxZoom: 15}).addTo(map);
+            L.easyPrint({
+      		title:'this is a title',
+      		sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
+      		filename: 'heatMap',
+      		exportOnly: true,
+		        }).addTo(map);
+            return map;
+
+         });
 
    arrestChart
         .width(200)
@@ -277,6 +292,7 @@ function makeGraphs(records) {
     _.each(dcCharts, function (dcChart) {
         dcChart.on("filtered", function(chart, filter){
             map.eachLayer(function (layer) {
+                console.log(layer)
                 map.removeLayer(layer)
             });
             drawMap();
@@ -284,7 +300,7 @@ function makeGraphs(records) {
 
     });
 
-    //dc.renderAll();
+    dc.renderAll();
 
     /*window.addEventListener('resize', function () {
         dc.renderAll();
@@ -302,6 +318,7 @@ function makeGraphs(records) {
 }
 //this makes the normal map with markers clustered
 function makeMap(records, id){
+     var mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
     var crimeMap = dc.leafletMarkerChart("#"+id);
         var ndx = crossfilter(records);
 
@@ -374,9 +391,28 @@ function makeMap(records, id){
                     iconUrl: iconUrl,
                     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png'
                 });
+            })
+            .icon( function (d) {
+                console.log(d);
+                return L.icon({ iconUrl: '../../images/map-marker-red.png'});
+
             })*/
             .fitOnRedraw(true)
-            .cluster(true);
+            .cluster(true)
+            .tiles(function (map) {
+                 L.tileLayer(
+                'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; ' + mapLink + ' Contributors',
+				maxZoom: 15}).addTo(map);
+                L.easyPrint({
+      		        tileLayer: 'something',
+      		        sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
+      		        filename: 'heatMap',
+      		        exportOnly: true,
+		        }).addTo(map);
+                return map;
+                }
+            );
        crimeMap.render();
 
 
@@ -545,6 +581,17 @@ function makeMapForClustering(regions, labels, k, colors, coloredDistricts){
     //console.log('colrsss'+ colors1);
 
     mapForClusters = L.map('map-clusters');
+
+    mapForClusters.setView([41.8781,-87.6298],10);
+        mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
+        L.tileLayer(
+			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; ' + mapLink + ' Contributors',
+				maxZoom: 15,
+			}).addTo(mapForClusters);
+
+
+
     //if(heatMap != undefined || heatMap != null)
     //adding print map fonctionality
     var printer = L.easyPrint({
@@ -554,11 +601,46 @@ function makeMapForClustering(regions, labels, k, colors, coloredDistricts){
       		exportOnly: true,
 		}).addTo(mapForClusters);
 
-     var geoJsonLayer = new L.GeoJSON.AJAX("/static/visual/bNew.geojson",
+
+    /*function showPopup(feature, layer){
+        var label = L.marker(layer.getBounds().getCenter(),{
+            className: 'label',
+            html: "hello world",
+            iconSize: [100, 40]
+        })
+    };
+
+    L.geoJson(districts, {
+        style: function (feature) {
+        return {color : "#77777"}
+    }
+        }).bindPopup(function (layer) {
+    return layer.feature.properties.dist_label;
+    }).addTo(mapForClusters);*/
+
+
+
+    /*var labelLayer = L.geoJson(districts, {
+        pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, labelMarkerOptions);
+        },
+        onEachFeature: function (feature, layer) {
+                layer.bindTooltip(feature.properties.dist_label, {noHide:true,direction:'right'});
+        }
+    });
+
+    labelLayer.eachLayer(function(l) {l.showLabel();});
+    mapForClusters.addLayer(labelLayer);*/
+
+
+
+
+
+     /*var geoJsonLayer = new L.GeoJSON.AJAX("/static/visual/bNew.geojson",
          {
          style: function (feature) {
              var district = feature.properties.dist_num;
-             console.log(district);
+
              var index = correctOrder.indexOf(parseInt(district));
              if(index !== -1){
                 return {
@@ -571,23 +653,60 @@ function makeMapForClustering(regions, labels, k, colors, coloredDistricts){
 				fillOpacity: 0.8}
              }else return {fillColor: "#ff7800"}
 
-         }}
+         }
+
+         },{
+            onEachFeature: function (feature, layer) {
+                console.log(feature);
+            }
+         }
 
      );
-    geoJsonLayer.addTo(mapForClusters);
-    //kkjkjkj
-    L.GeoJSON.AJAX("/static/visual/bNew.geojson",{
+    geoJsonLayer.addTo(mapForClusters);*/
+
+
+
+     districts.features.forEach(function (e) {
+
+         let latlng = [];
+
+        e.geometry.coordinates[0][0].forEach(v => {
+          latlng.push([v[1], v[0]])
+        })
+
+         console.log(e.properties.dist_num);
+         let polygon= L.polygon(latlng,{
+             fillColor: coloredDistricts[e.properties.dist_num],
+             color:'black',
+             weight: 2,
+             radius: 8,
+             opacity: 1,
+             dashArray: '3',
+             fillOpacity: 0.8
+         }).addTo(mapForClusters)
+         let center=polygon.getBounds().getCenter();
+
+        L.marker(center, {}).bindPopup(e.properties.dist_label).openPopup()
+        .addTo(mapForClusters)
+     })
+     //
+     // L.geoJson(districts.features.geometry,{
+     //
+     // }).addTo(mapForClusters);
+
+
+    /*L.GeoJSON.AJAX("/static/visual/bNew.geojson",{
+        onEachFeature: addLabel()
+    }).addTo(mapForClusters)*/
+
+
+
+    /*L.GeoJSON.AJAX("/static/visual/bNew.geojson",{
         onEachFeature: onEachFeature
-    }).addTo(mapForClusters);
+    }).addTo(mapForClusters);*/
 
 
-        mapForClusters.setView([41.8781,-87.6298],10);
-        mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-        L.tileLayer(
-			'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				attribution: '&copy; ' + mapLink + ' Contributors',
-				maxZoom: 15,
-			}).addTo(mapForClusters);
+
 
 
 }

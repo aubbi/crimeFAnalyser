@@ -147,7 +147,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
 # redirect user after login
-LOGIN_REDIRECT_URL = '/vis/home/'
+LOGIN_REDIRECT_URL = '/vis/landing-page/'
 
 # redirect user after logout
 LOGOUT_REDIRECT_URL = '/accounts/login/'

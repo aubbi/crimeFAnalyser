@@ -177,7 +177,7 @@
                   </div>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary btn-lg btn-block">Calculer</button>
+            <button type="submit" class="btn btn-primary">Calculer</button>
             </form>
           </div>
         </div>
@@ -196,11 +196,13 @@
             </div>
             <div class="row">
                 <div style="height: 600px; width: 1000px; vertical-align:middle;" id="components"></div>
+                <div id="link"></div>
             </div>
             <h4>2. Evaluation du modèle</h4>
-            <div id="results" class="row">
-              
+            <div  class="row">
+                <div class="col-md-8 offset-2" id="results"></div>
             </div>
+
           </div>
         </div>
       </div>
@@ -283,11 +285,21 @@
           console.log(metriques);
           var element1 = document.getElementById('components');
           var element = document.getElementById('results');
+          var element3 = document.getElementById('link')
           element1.innerHTML = '<image style="height: 600px;" id="image1" src="../../' + paths['path_components'] + '">';
+<<<<<<< HEAD
           element.innerHTML = '<h3>>>RMSE'+ metriques['rmse'] + '</h3><br><h3>>> MAPE = ' + metriques['mape'] + '</h3><br><h3>>> Exactitude % = ' + metriques['mape'] +'>';
+=======
+          element3.innerHTML += '<a href="../../' + paths['path_components'] + '> Sauvegarder</a>';
+          //element.innerHTML = '<h3> RMSE: </h3>'+ metriques['rmse'] + '<h3> MAPE : </h3>' + metriques['mape'] + '';
+          element.innerHTML = '<table class="table text-center"><thead class="text-uppercase bg-success"><tr><th>RMSE</th><th>MAPE</th></thead></tr><tr><th>' +metriques["rmse"].toFixed(2)+ '</th><th>' + metriques["mape"].toFixed(4) * 100 +'</th></tr></table>'
+
+
+
+>>>>>>> refs/remotes/origin/master
         },
         error: function (msg) {
-          alert('no response');
+          alert('no response', msg);
         }
       });
     });
