@@ -114,44 +114,20 @@
             <!--Here goes the 1st step code-->
             <div style="padding: 30px;" id="prophet" style="display: block;">
                 {% csrf_token %}
-                <h4 class="header-title">Croissance</h4>
-                <div class="form-row col-md-6 col-lg-6">
-                  <b class="text-muted col-md-4 mb-3 mb-3 d-block">Mode de croissance</b>
-                  <br>
-                  <div class=" col-md-4 mb-3 custom-control custom-radio">
-                    <input type="radio" checked="" id="linear" name="customRadio" class="custom-control-input">
-                    <label class="custom-control-label" for="customRadio1"> Linéaire</label>
-                  </div>
-                  <div class="col-md-4 mb-3 custom-control custom-radio">
-                    <input type="radio" id="logistic" name="customRadio" class="custom-control-input">
-                    <label class="custom-control-label" for="customRadio2"> Logistic</label>
-                  </div>
-                  <b class="text-muted col-md-4 mb-3 mb-3 d-block">Si le mode = Logistic</b>
-                  <div class="col-md-4 mb-3">
-                    <div class="form-group">
-                      <label for="end_date" class="col-form-label">Valeur min </label>
-                      <input class="form-control" name="valMin" value="0" min="0" id="valMin" type="number">
-                    </div>
-                  </div>
-                  <div class="col-md-4 mb-3">
-                    <div class="form-group">
-                      <label for="end_date" class="col-form-label">Valeur max </label>
-                      <input class="form-control" name="valMax" value="1000" min="0" id="valMax" type="number">
-                    </div>
-                  </div>
-                </div>
                 <h4 class="header-title">Saisonnalité</h4>
                 <div class="form-row col-md-6 col-lg-6">
                   <b class="text-muted col-md-4 mb-3 mb-3 d-block">Mode saisonnalité</b>
                   <br>
-                  <div class=" col-md-4 mb-3 custom-control custom-radio">
-                    <input type="radio" id="modeAdditif" name="modeAdditif" class="custom-control-input">
-                    <label class="custom-control-label" for="modeAdditif"> Additif</label>
+                 
+                  <div class="custom-control custom-checkbox custom-control-inline">
+                    <input type="checkbox" checked class="custom-control-input" id="modeAdditif" name="modeAdditif" value="additive">
+                    <label class="custom-control-label" for="modeAdditif">additif</label>
                   </div>
-                  <div class="col-md-4 mb-3 custom-control custom-radio">
-                    <input type="radio" id="modeMultiplicatif" name="modeMultiplicatif" class="custom-control-input">
-                    <label class="custom-control-label" for="modeMultiplicatif"> Multiplicatif</label>
+                  <div class="custom-control custom-checkbox custom-control-inline">
+                    <input type="checkbox"  class="custom-control-input" id="modeMultiplicatif" name="modeMultiplicatif" value="multiplicative">
+                    <label class="custom-control-label" for="modeMultiplicatif">multiplicatif</label>
                   </div>
+                  
                 </div>
                 <div class="form-row">
                   <div class="col-md-4 mb-3">
@@ -221,6 +197,10 @@
 
   <script type="text/javascript">
 
+
+    document.getElementById("modeAdditif").disabled = true;
+     document.getElementById("modeMultiplicatif").disabled = true;
+
       $body = $("body");
        $(document).on({
          ajaxStart: function () { $body.addClass("loading"); },
@@ -263,12 +243,8 @@
           startDate: $("#startDate").val(),
           endDate: $("#endDate").val(),
           // values of Prophet parameters
-          linear: $("#linear").val(),
-          logistic: $("#logistic").val(),
           modeAdditif: $("#modeAdditif").val(),
           modeMultiplicatif: $("#modeMultiplicatif").val(),
-          valMax: $("#valMax").val(),
-          valMin: $("#valMin").val(),
           ordreHebdomadaire: $("#ordreHebdomadaire").val(),
           ordreAnnuel: $("#ordreAnnuel").val(),
           seasonalityPriorScale: $("#seasonalityPriorScale").val(),
@@ -287,16 +263,11 @@
           var element = document.getElementById('results');
           var element3 = document.getElementById('link')
           element1.innerHTML = '<image style="height: 600px;" id="image1" src="../../' + paths['path_components'] + '">';
-<<<<<<< HEAD
-          element.innerHTML = '<h3>>>RMSE'+ metriques['rmse'] + '</h3><br><h3>>> MAPE = ' + metriques['mape'] + '</h3><br><h3>>> Exactitude % = ' + metriques['mape'] +'>';
-=======
+
           element3.innerHTML += '<a href="../../' + paths['path_components'] + '> Sauvegarder</a>';
           //element.innerHTML = '<h3> RMSE: </h3>'+ metriques['rmse'] + '<h3> MAPE : </h3>' + metriques['mape'] + '';
           element.innerHTML = '<table class="table text-center"><thead class="text-uppercase bg-success"><tr><th>RMSE</th><th>MAPE</th></thead></tr><tr><th>' +metriques["rmse"].toFixed(2)+ '</th><th>' + metriques["mape"].toFixed(4) * 100 +'</th></tr></table>'
 
-
-
->>>>>>> refs/remotes/origin/master
         },
         error: function (msg) {
           alert('no response', msg);

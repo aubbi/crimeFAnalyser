@@ -69,12 +69,9 @@ def makeForecast(request):
     period = request.POST['period']
     places = request.POST.getlist('places[]')
     # FbProphet parameters
-    linear = request.POST['linear']
-    logistic = request.POST['logistic']
-    modeAdditif = request.POST['modeAdditif']
-    modeMultiplicatif = request.POST['modeMultiplicatif']
-    valMax = request.POST['valMax']
-    valMin = request.POST['valMin']
+    #modeAdditif = request.POST['modeAdditif']
+    #modeMultiplicatif = request.POST['modeMultiplicatif']
+    #print(modeAdditif, modeMultiplicatif)
     ordreHebdomadaire = request.POST['ordreHebdomadaire']
     ordreAnnuel = request.POST['ordreAnnuel']
     changepointPriorScale = request.POST['changepointPriorScale']
@@ -92,6 +89,7 @@ def makeForecast(request):
     crimes = data.sort_values(by='ds')
     crimes.reset_index(inplace=True)
     crimes['ds'] = crimes.ds.astype(str)
+    mode = ''
 
    # m = Prophet(n_changepoints=25, changepoint_range=0.8, yearly_seasonality='none', seasonality_mode='additive', seasonality_prior_scale=seasonalityPriorScale, changepoint_prior_scale=changepointPriorScale, weekly_seasonality=False, yearly_seasonality=False).add_seasonality(name="weekly", period=7, fourier_order=ordreHebdomadaire)
     m = Prophet(growth="linear", seasonality_mode="additive", changepoint_prior_scale=changepointPriorScale, seasonality_prior_scale=seasonalityPriorScale, yearly_seasonality=False).add_seasonality(
