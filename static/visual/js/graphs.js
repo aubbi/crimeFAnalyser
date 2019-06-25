@@ -150,7 +150,22 @@ function makeGraphs(records) {
         .fitOnRedraw(true)
         .cluster(true)
         //.filterByArea(true)
-        .brushOn(false);
+        .brushOn(false)
+        .tiles(function (map) {
+
+             L.tileLayer(
+                'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; ' + mapLink + ' Contributors',
+				maxZoom: 15}).addTo(map);
+            L.easyPrint({
+      		title:'this is a title',
+      		sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
+      		filename: 'heatMap',
+      		exportOnly: true,
+		        }).addTo(map);
+            return map;
+
+         });
 
    arrestChart
         .width(200)
@@ -277,6 +292,7 @@ function makeGraphs(records) {
     _.each(dcCharts, function (dcChart) {
         dcChart.on("filtered", function(chart, filter){
             map.eachLayer(function (layer) {
+                console.log(layer)
                 map.removeLayer(layer)
             });
             drawMap();
@@ -284,7 +300,7 @@ function makeGraphs(records) {
 
     });
 
-    //dc.renderAll();
+    dc.renderAll();
 
     /*window.addEventListener('resize', function () {
         dc.renderAll();
@@ -302,6 +318,7 @@ function makeGraphs(records) {
 }
 //this makes the normal map with markers clustered
 function makeMap(records, id){
+     var mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
     var crimeMap = dc.leafletMarkerChart("#"+id);
         var ndx = crossfilter(records);
 
@@ -381,7 +398,21 @@ function makeMap(records, id){
 
             })*/
             .fitOnRedraw(true)
-            .cluster(true);
+            .cluster(true)
+            .tiles(function (map) {
+                 L.tileLayer(
+                'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; ' + mapLink + ' Contributors',
+				maxZoom: 15}).addTo(map);
+                L.easyPrint({
+      		        tileLayer: 'something',
+      		        sizeModes: ['Current', 'A4Landscape', 'A4Portrait'],
+      		        filename: 'heatMap',
+      		        exportOnly: true,
+		        }).addTo(map);
+                return map;
+                }
+            );
        crimeMap.render();
 
 

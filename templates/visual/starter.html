@@ -116,7 +116,6 @@
                                                 <h4 class="header-title mb-0">Heat-Map</h4>
                                             </div>
                                             <div class="col-sm-4">
-                                                <button class="pull-right btn btn-rounded btn-light mb-3"  onclick="toPNG('map', 'heatmap')" ><span class="fa fa-download"></span></button>
                                             </div>
                                     </div>
                                     <div id="map" style="width: 550px; height: 400px"></div>
@@ -131,7 +130,6 @@
                                                 <h4 class="header-title mb-0">Distribution géographique</h4>
                                             </div>
                                             <div class="col-sm-4">
-                                                <button class="pull-right btn btn-rounded btn-light mb-3"  onclick="toPNG('map2', 'Map')" ><span class="fa fa-download"></span></button>
                                             </div>
                                     </div>
                                     <div id="map2" style="width: 550px; height: 400px"></div>
@@ -193,7 +191,7 @@
             ndx = result[1];
             dcCharts = result[2];
             crimeMap = dcCharts[3];
-            dc.renderAll();
+            //dc.renderAll();
             //$('#image-loading').hide();
 
         },
@@ -237,7 +235,6 @@
                 }
             });
         });
-
 
 
 

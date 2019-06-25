@@ -92,9 +92,10 @@ def makeForecast(request):
     crimes.reset_index(inplace=True)
     crimes['ds'] = crimes.ds.astype(str)
 
-    m = Prophet(n_changepoints=25, changepoint_range=0.8,
-                yearly_seasonality='none', seasonality_mode='additive', seasonality_prior_scale=seasonalityPriorScale,
-                changepoint_prior_scale=changepointPriorScale, weekly_seasonality=False, yearly_seasonality=False).add_seasonality(name="weekly", period=7, fourier_order=ordreHebdomadaire)
+    #m = Prophet(n_changepoints=25, changepoint_range=0.8,
+    #            yearly_seasonality='none', seasonality_mode='additive', seasonality_prior_scale=seasonalityPriorScale,
+     #           changepoint_prior_scale=changepointPriorScale, weekly_seasonality=False, yearly_seasonality=False).add_seasonality(name="weekly", period=7, fourier_order=ordreHebdomadaire)
+    m = Prophet()
 
     m.fit(crimes)
     future = m.make_future_dataframe(periods=int(period))
@@ -115,7 +116,7 @@ def makeForecast(request):
 
     paths = {'path_components': path_components}
 
-    print(pd.merge(forecast, crimes, on='ds', how='inner'))
+    #print(pd.merge(forecast, crimes, on='ds', how='inner'))
 
     # Calculate RMSE and MAPE using 10% of the dataset as a testing dataset
     size = len(crimes)
