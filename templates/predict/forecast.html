@@ -157,14 +157,14 @@
                   <div class="col-md-4 mb-3">
                     <div class="form-group">
                       <label for="end_date" class="col-form-label">Ordre hebdomadaire </label>
-                      <input class="form-control" name="ordreHebdomadaire" min="0" value="5" id="ordreHebdomadaire"
+                      <input class="form-control" name="ordreHebdomadaire" min="0" value="20" id="ordreHebdomadaire"
                         type="number">
                     </div>
                   </div>
                   <div class="col-md-4 mb-3">
                     <div class="form-group">
                       <label for="end_date" class="col-form-label">Ordre annuel</label>
-                      <input class="form-control" name="ordreAnnuel" value="10" min="0" id="ordreAnnuel" type="number">
+                      <input class="form-control" name="ordreAnnuel" value="5" min="0" id="ordreAnnuel" type="number">
                     </div>
                   </div>
                 </div>
@@ -284,7 +284,7 @@
           var element1 = document.getElementById('components');
           var element = document.getElementById('results');
           element1.innerHTML = '<image style="height: 600px;" id="image1" src="../../' + paths['path_components'] + '">';
-          element.innerHTML = '<h2>'+ metriques['rmse'] + '</h2><h2>' + metriques['mape'] + '</h2>';
+          element.innerHTML = '<h3>>>RMSE'+ metriques['rmse'] + '</h3><br><h3>>> MAPE = ' + metriques['mape'] + '</h3><br><h3>>> Exactitude % = ' + metriques['mape'] +'>';
         },
         error: function (msg) {
           alert('no response');

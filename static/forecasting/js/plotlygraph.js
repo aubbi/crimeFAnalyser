@@ -53,7 +53,7 @@ function forecastAll(records) {
       color: "rgb(17, 157, 255)",
       size: 5,
       line: {
-        color: "red",
+        color: "#f3cec9",
         width: 1
       }
     }
@@ -64,6 +64,7 @@ function forecastAll(records) {
       type: "date",
       title: "Les jours"
     },
+    colorway: ["red", "black"],
     title: "Le nombre de crimes par jour"
   };
   Plotly.newPlot("myDiv", data, layout, { showSendToCloud: false });
